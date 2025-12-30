@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: mamallapuram-map
+    runtime: static
+    staticPublishPath: ./public
+    branch: main
