@@ -4,21 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mamallapuram</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
         :root {
-            /* Palette: Derived from Granite, Sand, and Bay Water */
-            --c-bg: #F4F3EF;          /* Mist Gray / Warm Stone */
-            --c-text: #3A3935;        /* Volcanic Stone (Softened) */
-            --c-subtle: #8C8883;      /* Weathered Rock */
-            --c-accent: #6B7C85;      /* Lagoon Blue (Muted) */
-            --c-marker: #5B5A56;      /* Deep Stone */
-            --c-panel: #FCFBF9;       /* Light Sand */
+            /* Palette: Pastel Dreams */
+            --c-bg: #FFF8F0;          /* Cream Base */
+            --c-text: #4A4A4A;        /* Dark Grey */
+            --c-subtle: #8D99AE;      /* Cool Grey */
+            --c-accent: #FFB7B2;      /* Pastel Pink */
+            --c-secondary: #B5EAD7;   /* Pastel Mint */
+            --c-panel: rgba(255, 255, 255, 0.65); /* Glassy White */
+            --c-marker: #FF9AA2;      /* Salmon Pink */
+            --c-marker-glow: #FFDAC1; /* Peach Glow */
 
-            --f-sys: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --f-serif: 'Playfair Display', serif;
+            --f-sans: 'Lato', sans-serif;
 
-            --ease-out: cubic-bezier(0.4, 0.0, 0.2, 1);
+            --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
             --dur-entry: 420ms;
             --dur-interact: 240ms;
         }
@@ -35,7 +41,7 @@
             height: 100%;
             width: 100%;
             background-color: var(--c-bg);
-            font-family: var(--f-sys);
+            font-family: var(--f-sans);
             color: var(--c-text);
             overflow: hidden;
             font-size: 16px;
@@ -53,8 +59,9 @@
 
         /* Tile Filtering */
         .leaflet-tile-pane {
-            filter: grayscale(100%) sepia(10%) contrast(90%) brightness(105%);
-            opacity: 0.85;
+            /* Warm, pastel dreamscape filter */
+            filter: sepia(30%) hue-rotate(-10deg) saturate(0.8) brightness(1.05) contrast(0.9);
+            opacity: 0.9;
         }
 
         /* UI Layer */
@@ -74,24 +81,28 @@
 
         /* Title */
         h1 {
-            font-weight: 500;
-            font-size: 1.1rem;
-            letter-spacing: -0.01em;
+            font-family: var(--f-serif);
+            font-weight: 400;
+            font-size: 2.5rem; /* Larger, more elegant */
+            letter-spacing: -0.02em;
             color: var(--c-text);
             opacity: 0;
-            transform: translateY(6px);
+            transform: translateY(10px);
             animation: fadeUp var(--dur-entry) var(--ease-out) 100ms forwards;
             pointer-events: auto;
-            max-width: 200px;
-            line-height: 1.4;
+            line-height: 1.1;
+            text-shadow: 0 2px 10px rgba(255,255,255,0.5);
         }
 
         .subtitle {
+            font-family: var(--f-sans);
             display: block;
-            font-weight: 400;
-            font-size: 0.85rem;
+            font-weight: 300;
+            font-size: 0.95rem;
             color: var(--c-subtle);
-            margin-top: 0.4rem;
+            margin-top: 0.6rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
         }
 
         /* Marker Styles */
@@ -128,24 +139,31 @@
         }
 
         /* Idle Pulse */
-        @keyframes subtlePulse {
-            0% { opacity: 0.9; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(0.96); }
-            100% { opacity: 0.9; transform: scale(1); }
+        @keyframes ripple {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 183, 178, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(255, 183, 178, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 183, 178, 0);
+            }
         }
 
         .marker-dot.idle {
-            animation: subtlePulse 5s ease-in-out infinite;
+            animation: ripple 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .custom-marker:hover .marker-dot {
-            transform: scale(1.1);
-            background-color: var(--c-text);
+            transform: scale(1.2);
+            background-color: var(--c-accent);
         }
 
         .custom-marker:hover .marker-dot::after {
             opacity: 1;
-            transform: scale(1);
+            transform: scale(1.5);
+            background: rgba(255, 183, 178, 0.2);
         }
 
         /* Info Panel */
@@ -153,36 +171,55 @@
             position: absolute;
             bottom: 3rem;
             left: 2rem;
-            max-width: 320px;
+            width: calc(100% - 4rem);
+            max-width: 340px;
             background: var(--c-panel);
-            padding: 1.8rem;
-            border-radius: 2px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.04), 0 1px 2px rgba(255,255,255,0.8) inset;
             opacity: 0;
-            transform: translateY(10px);
-            transition: all var(--dur-entry) var(--ease-out);
+            transform: translateY(20px) scale(0.98);
+            transition: all 0.5s var(--ease-out);
             pointer-events: auto;
-            border-left: 1px solid rgba(0,0,0,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 480px) {
+            .info-panel {
+                left: 1rem;
+                bottom: 2rem;
+                width: calc(100% - 2rem);
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
         }
 
         .info-panel.active {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
         }
 
         .info-title {
-            font-size: 0.95rem;
-            font-weight: 500;
-            margin-bottom: 0.8rem;
+            font-family: var(--f-serif);
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin-bottom: 0.6rem;
             color: var(--c-text);
             letter-spacing: -0.01em;
         }
 
         .info-body {
-            font-size: 0.9rem;
-            line-height: 1.6;
-            color: var(--c-accent); /* Muted blue/grey for text */
-            font-weight: 400;
+            font-family: var(--f-sans);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #666; /* slightly darker for readability on glass */
+            font-weight: 300;
         }
 
         /* Animations */
