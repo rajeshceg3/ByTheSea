@@ -136,6 +136,7 @@
             transition: all 0.6s var(--ease-smooth);
             pointer-events: auto;
             position: relative;
+            will-change: transform, opacity;
         }
 
         .info-panel.active {
@@ -204,6 +205,7 @@
             align-items: center;
             justify-content: center;
             transition: z-index 0.1s;
+            will-change: transform;
         }
 
         .pin {
@@ -304,7 +306,7 @@
     </style>
 </head>
 <body>
-    <div id="map"></div>
+    <div id="map" aria-label="Map of Mamallapuram" role="application"></div>
 
     <div class="ui-layer">
         <header class="glass-card">
@@ -373,49 +375,82 @@
         const panelTitle = document.getElementById('panel-title');
         const panelBody = document.getElementById('panel-body');
         let activeMarker = null;
+        const markers = {};
 
         locations.forEach(loc => {
             const icon = L.divIcon({
                 className: 'custom-marker',
-                html: `<div class="pulse"></div><div class="pin"></div>`,
+                html: `<div class="pulse"></div><div class="pin" role="button" tabindex="0" aria-label="${loc.name}"></div>`,
                 iconSize: [40, 40],
                 iconAnchor: [20, 20]
             });
 
-            const marker = L.marker(loc.coords, { icon: icon }).addTo(map);
+            const marker = L.marker(loc.coords, { icon: icon });
+            markers[loc.name] = marker;
+
+            marker.on('add', () => {
+                const el = marker.getElement();
+                if (el) {
+                    el.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            marker.fire('click');
+                        }
+                    });
+                }
+            });
+
+            marker.addTo(map);
 
             marker.on('click', (e) => {
+                if (activeMarker === loc.name) return;
+
                 const isMobile = window.innerWidth < 600;
-                const offset = isMobile ? [0, 100] : [150, 0];
+                // Offset: negative Y moves center down, putting marker UP (above bottom panel)
+                const offset = isMobile ? [0, -150] : [150, 0];
 
-                // Calculate target position to center the marker relative to open space
-                const targetPoint = map.project(e.latlng, 16).subtract(offset);
-                const targetLatLng = map.unproject(targetPoint, 16);
+                const targetZoom = Math.max(map.getZoom(), 16);
+                const targetPoint = map.project(e.latlng, targetZoom).subtract(offset);
+                const targetLatLng = map.unproject(targetPoint, targetZoom);
 
-                map.flyTo(targetLatLng, 16, {
+                map.flyTo(targetLatLng, targetZoom, {
                     animate: true,
                     duration: 1.2,
                     easeLinearity: 0.25
                 });
                 showPanel(loc);
-                e.originalEvent.stopPropagation();
+                L.DomEvent.stopPropagation(e);
             });
 
             marker.on('mouseover', function() { this.setZIndexOffset(1000); });
-            marker.on('mouseout', function() { this.setZIndexOffset(0); });
+            marker.on('mouseout', function() {
+                if (activeMarker !== loc.name) {
+                    this.setZIndexOffset(0);
+                }
+            });
         });
 
         function showPanel(data) {
             if (activeMarker === data.name && panel.classList.contains('active')) return;
 
+            if (activeMarker && markers[activeMarker]) {
+                markers[activeMarker].setZIndexOffset(0);
+            }
+
             panelTitle.innerText = data.name;
             panelBody.innerText = data.text;
             panel.classList.add('active');
             activeMarker = data.name;
+
+            if (markers[activeMarker]) {
+                markers[activeMarker].setZIndexOffset(1000);
+            }
         }
 
         function hidePanel() {
             panel.classList.remove('active');
+            if (activeMarker && markers[activeMarker]) {
+                markers[activeMarker].setZIndexOffset(0);
+            }
             activeMarker = null;
         }
 
