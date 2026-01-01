@@ -3,24 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mamallapuram</title>
+    <title>Mamallapuram | Coastal Serenity</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,500;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
     <style>
         :root {
-            /* Palette: Derived from Granite, Sand, and Bay Water */
-            --c-bg: #F4F3EF;          /* Mist Gray / Warm Stone */
-            --c-text: #3A3935;        /* Volcanic Stone (Softened) */
-            --c-subtle: #8C8883;      /* Weathered Rock */
-            --c-accent: #6B7C85;      /* Lagoon Blue (Muted) */
-            --c-marker: #5B5A56;      /* Deep Stone */
-            --c-panel: #FCFBF9;       /* Light Sand */
+            /* Palette: Coastal Pastel */
+            --c-bg: #F0F4F8;          /* Alice Blue / Soft Sky */
+            --c-text-main: #2D3748;   /* Dark Slate */
+            --c-text-sec: #718096;    /* Cool Grey */
+            --c-accent-warm: #F6AD55; /* Soft Orange/Peach */
+            --c-accent-cool: #38B2AC; /* Teal */
+            --c-glass: rgba(255, 255, 255, 0.85); /* Slightly more opaque for better readability */
+            --c-glass-border: rgba(255, 255, 255, 0.6);
 
-            --f-sys: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --f-head: 'Playfair Display', serif;
+            --f-body: 'Lato', sans-serif;
 
-            --ease-out: cubic-bezier(0.4, 0.0, 0.2, 1);
-            --dur-entry: 420ms;
-            --dur-interact: 240ms;
+            --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            --ease-smooth: cubic-bezier(0.4, 0.0, 0.2, 1);
+            --dur-entry: 800ms;
         }
 
         * {
@@ -35,26 +45,25 @@
             height: 100%;
             width: 100%;
             background-color: var(--c-bg);
-            font-family: var(--f-sys);
-            color: var(--c-text);
+            font-family: var(--f-body);
+            color: var(--c-text-main);
             overflow: hidden;
-            font-size: 16px;
         }
 
-        /* Map Container */
+        /* Map Styling */
         #map {
             height: 100%;
             width: 100%;
             opacity: 0;
             background: var(--c-bg);
-            transition: opacity var(--dur-entry) var(--ease-out);
+            transition: opacity 1s ease-out;
             z-index: 1;
         }
 
-        /* Tile Filtering */
+        /* Tint the map tiles to match the pastel theme */
         .leaflet-tile-pane {
-            filter: grayscale(100%) sepia(10%) contrast(90%) brightness(105%);
-            opacity: 0.85;
+            /* Subtle blue/purple shift for sea/sky vibe */
+            filter: grayscale(100%) sepia(8%) hue-rotate(190deg) brightness(102%) contrast(92%);
         }
 
         /* UI Layer */
@@ -66,315 +75,339 @@
             height: 100%;
             pointer-events: none;
             z-index: 1000;
-            padding: 2rem;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            padding: 2.5rem;
         }
 
-        /* Title */
-        h1 {
-            font-weight: 500;
-            font-size: 1.1rem;
-            letter-spacing: -0.01em;
-            color: var(--c-text);
-            opacity: 0;
-            transform: translateY(6px);
-            animation: fadeUp var(--dur-entry) var(--ease-out) 100ms forwards;
+        /* Glassmorphism Card Utility */
+        .glass-card {
+            background: var(--c-glass);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            border: 1px solid var(--c-glass-border);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.8),
+                0 4px 20px rgba(0, 0, 0, 0.03),
+                0 20px 40px rgba(0, 0, 0, 0.04);
+            border-radius: 20px;
+        }
+
+        /* Header */
+        header {
             pointer-events: auto;
-            max-width: 200px;
-            line-height: 1.4;
+            align-self: flex-start;
+            padding: 1.8rem 2.5rem;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: slideDown var(--dur-entry) var(--ease-smooth) 200ms forwards;
+        }
+
+        h1 {
+            font-family: var(--f-head);
+            font-weight: 700;
+            font-size: 2.4rem;
+            color: var(--c-text-main);
+            line-height: 1;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.2rem;
         }
 
         .subtitle {
             display: block;
+            font-family: var(--f-body);
             font-weight: 400;
             font-size: 0.85rem;
-            color: var(--c-subtle);
-            margin-top: 0.4rem;
-        }
-
-        /* Marker Styles */
-        .custom-marker {
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform var(--dur-interact) var(--ease-out);
-        }
-
-        .marker-dot {
-            width: 10px;
-            height: 10px;
-            background-color: var(--c-marker);
-            border-radius: 50%;
-            box-shadow: 0 0 12px rgba(91, 90, 86, 0.15);
-            transition: transform var(--dur-interact) var(--ease-out), opacity var(--dur-interact) var(--ease-out);
-            position: relative;
-        }
-
-        .marker-dot::after {
-            content: '';
-            position: absolute;
-            top: -6px;
-            left: -6px;
-            right: -6px;
-            bottom: -6px;
-            border-radius: 50%;
-            background: rgba(91, 90, 86, 0.05);
-            opacity: 0;
-            transform: scale(0.8);
-            transition: all var(--dur-interact) var(--ease-out);
-        }
-
-        /* Idle Pulse */
-        @keyframes subtlePulse {
-            0% { opacity: 0.9; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(0.96); }
-            100% { opacity: 0.9; transform: scale(1); }
-        }
-
-        .marker-dot.idle {
-            animation: subtlePulse 5s ease-in-out infinite;
-        }
-
-        .custom-marker:hover .marker-dot {
-            transform: scale(1.1);
-            background-color: var(--c-text);
-        }
-
-        .custom-marker:hover .marker-dot::after {
-            opacity: 1;
-            transform: scale(1);
+            color: var(--c-text-sec);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            opacity: 0.8;
         }
 
         /* Info Panel */
         .info-panel {
-            position: absolute;
-            bottom: 3rem;
-            left: 2rem;
-            max-width: 320px;
-            background: var(--c-panel);
-            padding: 1.8rem;
-            border-radius: 2px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            align-self: flex-start;
+            width: 380px;
+            max-width: 88vw;
+            padding: 2.5rem;
             opacity: 0;
-            transform: translateY(10px);
-            transition: all var(--dur-entry) var(--ease-out);
+            transform: translateY(20px) scale(0.98);
+            transition: all 0.6s var(--ease-smooth);
             pointer-events: auto;
-            border-left: 1px solid rgba(0,0,0,0.05);
+            position: relative;
         }
 
         .info-panel.active {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
+        }
+
+        .panel-content {
+            position: relative;
+            z-index: 2;
         }
 
         .info-title {
-            font-size: 0.95rem;
+            font-family: var(--f-head);
+            font-size: 1.8rem;
             font-weight: 500;
-            margin-bottom: 0.8rem;
-            color: var(--c-text);
+            margin-bottom: 1rem;
+            color: var(--c-text-main);
             letter-spacing: -0.01em;
+            line-height: 1.1;
         }
 
         .info-body {
-            font-size: 0.9rem;
+            font-size: 1.05rem;
             line-height: 1.6;
-            color: var(--c-accent); /* Muted blue/grey for text */
-            font-weight: 400;
+            color: var(--c-text-sec);
+            font-weight: 300;
         }
 
-        /* Animations */
-        @keyframes fadeUp {
+        .panel-close {
+            position: absolute;
+            top: 1.2rem;
+            right: 1.2rem;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            opacity: 0.4;
+            transition: all 0.2s;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            padding: 0;
+            outline: none;
+        }
+        .panel-close:hover, .panel-close:focus {
+            opacity: 1;
+            background: rgba(0,0,0,0.08);
+            transform: scale(1.1);
+        }
+        .panel-close:focus-visible {
+            box-shadow: 0 0 0 2px var(--c-accent-cool);
+        }
+        .panel-close svg {
+            width: 14px;
+            height: 14px;
+            fill: var(--c-text-main);
+            pointer-events: none;
+        }
+
+        /* Markers */
+        .custom-marker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: z-index 0.1s;
+        }
+
+        .pin {
+            width: 18px;
+            height: 18px;
+            background: var(--c-accent-warm);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(246, 173, 85, 0.4);
+            transition: transform 0.4s var(--ease-elastic), background 0.3s;
+            z-index: 2;
+            border: 2px solid #FFF;
+        }
+
+        .pulse {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: rgba(246, 173, 85, 0.25);
+            border-radius: 50%;
+            z-index: 1;
+            animation: pulse 4s infinite ease-out;
+            pointer-events: none;
+        }
+
+        .custom-marker:hover .pin {
+            transform: scale(1.3);
+            background: var(--c-accent-cool);
+            box-shadow: 0 6px 20px rgba(56, 178, 172, 0.4);
+            border-color: #F0F4F8;
+        }
+
+        .custom-marker:hover .pulse {
+            background: rgba(56, 178, 172, 0.2);
+            animation-duration: 2s;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.2); opacity: 0.8; }
+            50% { opacity: 0.4; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+
+        @keyframes slideDown {
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Controls */
+        /* Zoom Controls Override */
         .leaflet-control-zoom {
             border: none !important;
-            box-shadow: none !important;
-            opacity: 0;
-            transition: opacity var(--dur-interact) var(--ease-out);
+            margin-bottom: 3rem !important;
+            margin-right: 3rem !important;
         }
-
-        .leaflet-control-zoom-in, .leaflet-control-zoom-out {
-            background-color: var(--c-bg) !important;
-            color: var(--c-marker) !important;
+        .leaflet-control-zoom a {
+            background: var(--c-glass) !important;
+            backdrop-filter: blur(10px) !important;
+            color: var(--c-text-main) !important;
+            border: 1px solid var(--c-glass-border) !important;
+            border-radius: 12px !important;
+            width: 48px !important;
+            height: 48px !important;
+            line-height: 48px !important;
+            margin-bottom: 12px !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
             font-weight: 300 !important;
-            font-size: 1.2rem !important;
-            border-radius: 2px !important;
-            margin-bottom: 4px !important;
-            border: 1px solid rgba(0,0,0,0.05) !important;
+            font-size: 1.4rem !important;
+            transition: all 0.2s !important;
         }
-
-        .leaflet-bar a:hover {
-            background-color: #FFF !important;
-            color: #000 !important;
-        }
-
-        #map:active .leaflet-control-zoom {
-            opacity: 1;
-        }
-
-        .leaflet-container {
-            background: var(--c-bg) !important;
-            font-family: var(--f-sys) !important;
+        .leaflet-control-zoom a:hover {
+            background: #FFF !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08) !important;
         }
 
         /* Attribution */
         .leaflet-control-attribution {
             background: transparent !important;
-            color: var(--c-subtle) !important;
-            font-size: 0.65rem !important;
-            opacity: 0.4;
+            font-family: var(--f-body);
+            color: var(--c-text-sec);
+            opacity: 0.5;
+            margin-right: 1.5rem;
+            margin-bottom: 0.8rem;
+            font-size: 0.7rem !important;
         }
         .leaflet-control-attribution a {
-            color: var(--c-subtle) !important;
+            color: var(--c-text-sec) !important;
             text-decoration: none;
         }
 
-        /* Intro Overlay */
-        #intro {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            pointer-events: none;
-            z-index: 900;
-            transition: opacity 800ms ease-out;
+        /* Responsive */
+        @media (max-width: 600px) {
+            .ui-layer { padding: 1.5rem; }
+            header { padding: 1.2rem 1.5rem; }
+            h1 { font-size: 1.8rem; }
+            .info-panel { width: 100%; bottom: 0; padding: 1.5rem; }
+            .leaflet-control-zoom { display: none; } /* Hide zoom on mobile */
         }
     </style>
 </head>
 <body>
-
     <div id="map"></div>
 
     <div class="ui-layer">
-        <h1>
-            Mamallapuram
+        <header class="glass-card">
+            <h1>Mamallapuram</h1>
             <span class="subtitle">Stone. Salt. Silence.</span>
-        </h1>
+        </header>
 
-        <!-- Info Panel Container -->
-        <div id="panel" class="info-panel">
-            <div class="info-title" id="panel-title"></div>
-            <div class="info-body" id="panel-body"></div>
+        <div id="panel" class="info-panel glass-card">
+            <button class="panel-close" onclick="hidePanel()" aria-label="Close details">
+                <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+            <div class="panel-content">
+                <div class="info-title" id="panel-title"></div>
+                <div class="info-body" id="panel-body"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Data: Curated locations
         const locations = [
             {
                 name: "Shore Temple",
                 coords: [12.6111, 80.1973],
-                text: "Granite against the tide. The last of seven pagodas, standing where the ocean ends."
+                text: "Granite against the tide. The last of seven pagodas, standing where the ocean ends, bearing witness to centuries of monsoons and trade."
             },
             {
                 name: "Descent of the Ganges",
                 coords: [12.6163, 80.1918],
-                text: "A canvas of living rock. Elephants and gods frozen in a moment of arrival."
+                text: "A canvas of living rock. Elephants, gods, and ascetics frozen in a moment of celestial arrival, carved with a breathing realism."
             },
             {
                 name: "Krishna’s Butter Ball",
                 coords: [12.6175, 80.1923],
-                text: "Improbable balance. A monolith resting on a slope, defying the urge to roll."
+                text: "Improbable balance. A colossal monolith resting on a slope, defying gravity and the urge to roll, playful yet immovable."
             },
             {
                 name: "Pancha Rathas",
                 coords: [12.6083, 80.1894],
-                text: "Monoliths carved from single stones. Chariots that never moved, waiting in the sand."
+                text: "Chariots of stone. Five monolithic structures, each carved from a single rock, standing as eternal testaments to Pallava architecture."
             },
             {
                 name: "Mahabalipuram Lighthouse",
                 coords: [12.6144, 80.1947],
-                text: "A silent watch over the Coromandel coast. Light cutting through the salt air."
+                text: "A silent watch over the Coromandel coast. Its light cuts through the salt air, guiding ships past the ancient granite shores."
             }
         ];
 
-        // Map Config
-        const config = {
+        const map = L.map('map', {
             center: [12.6140, 80.1935],
             zoom: 15,
             minZoom: 14,
-            maxZoom: 17,
-            zoomDelta: 0.5,
-            zoomSnap: 0.5,
-            wheelPxPerZoomLevel: 120
-        };
-
-        // Initialize Map
-        const map = L.map('map', {
-            center: config.center,
-            zoom: config.zoom,
+            maxZoom: 18,
             zoomControl: false,
-            attributionControl: true,
-            zoomAnimation: true,
-            fadeAnimation: true,
-            markerZoomAnimation: true
+            attributionControl: true
         });
 
-        // Add Zoom Control (bottom right, subtle)
-        L.control.zoom({
-            position: 'bottomright'
-        }).addTo(map);
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-        // Tile Layer - CartoDB Positron (No Labels for maximum abstraction)
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
             subdomains: 'abcd',
             maxZoom: 20
         }).addTo(map);
 
-        // State
-        let activeMarker = null;
         const panel = document.getElementById('panel');
         const panelTitle = document.getElementById('panel-title');
         const panelBody = document.getElementById('panel-body');
+        let activeMarker = null;
 
-        // Markers
         locations.forEach(loc => {
             const icon = L.divIcon({
                 className: 'custom-marker',
-                html: `<div class="marker-dot idle"></div>`,
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
+                html: `<div class="pulse"></div><div class="pin"></div>`,
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
             });
 
             const marker = L.marker(loc.coords, { icon: icon }).addTo(map);
 
             marker.on('click', (e) => {
-                // Pan to marker with offset for panel
-                const targetPoint = map.project(e.latlng, map.getZoom()).subtract([0, 100]); // Shift map up slightly
-                const targetLatLng = map.unproject(targetPoint, map.getZoom());
+                const isMobile = window.innerWidth < 600;
+                const offset = isMobile ? [0, 100] : [150, 0];
 
-                map.panTo(targetLatLng, {
+                // Calculate target position to center the marker relative to open space
+                const targetPoint = map.project(e.latlng, 16).subtract(offset);
+                const targetLatLng = map.unproject(targetPoint, 16);
+
+                map.flyTo(targetLatLng, 16, {
                     animate: true,
                     duration: 1.2,
-                    easeLinearity: 0.2
+                    easeLinearity: 0.25
                 });
-
                 showPanel(loc);
                 e.originalEvent.stopPropagation();
             });
+
+            marker.on('mouseover', function() { this.setZIndexOffset(1000); });
+            marker.on('mouseout', function() { this.setZIndexOffset(0); });
         });
 
-        // Panel Logic
         function showPanel(data) {
             if (activeMarker === data.name && panel.classList.contains('active')) return;
 
-            // Fade out if switching
-            if (panel.classList.contains('active')) {
-                panel.classList.remove('active');
-                setTimeout(() => updateAndShow(data), 250);
-            } else {
-                updateAndShow(data);
-            }
-        }
-
-        function updateAndShow(data) {
             panelTitle.innerText = data.name;
             panelBody.innerText = data.text;
             panel.classList.add('active');
@@ -386,26 +419,11 @@
             activeMarker = null;
         }
 
-        // Global Interactions
-        map.on('click', () => {
-            hidePanel();
-        });
+        map.on('click', () => hidePanel());
 
-        map.on('dragstart', () => {
-            // Optional: hide panel on drag? Or keep it?
-            // "Land resists haste" - keeping it allows contemplation.
-            // But let's follow standard "dismiss on interact" to clear view.
-            // hidePanel();
-        });
-
-        // Intro Animation
-        window.addEventListener('load', () => {
-            const mapEl = document.getElementById('map');
-            setTimeout(() => {
-                mapEl.style.opacity = '1';
-            }, 100);
-        });
-
+        window.onload = () => {
+            document.getElementById('map').style.opacity = '1';
+        };
     </script>
 </body>
 </html>
