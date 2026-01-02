@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Mamallapuram | Coastal Serenity</title>
+    <meta name="description" content="An immersive journey through the stone and silence of Mamallapuram.">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,500;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -16,29 +17,42 @@
 
     <style>
         :root {
-            /* Palette: Coastal Pastel */
-            --c-bg: #F0F4F8;          /* Alice Blue / Soft Sky */
-            --c-text-main: #2D3748;   /* Dark Slate */
-            --c-text-sec: #718096;    /* Cool Grey */
-            --c-accent-warm: #F6AD55; /* Soft Orange/Peach */
-            --c-accent-cool: #38B2AC; /* Teal */
-            --c-glass: rgba(255, 255, 255, 0.85); /* Slightly more opaque for better readability */
-            --c-glass-border: rgba(255, 255, 255, 0.6);
+            /* Palette: Coastal Serenity Refined */
+            --c-bg: #F0F4F8;
+            --c-surface: #ffffff;
+            --c-text-main: #2D3748;
+            --c-text-light: #718096;
 
+            --c-accent-warm: #DD6B20; /* Burnt Orange */
+            --c-accent-warm-soft: #FBD38D;
+            --c-accent-cool: #319795; /* Teal */
+            --c-accent-cool-soft: #B2F5EA;
+
+            /* Glassmorphism */
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            --glass-blur: blur(20px);
+
+            /* Typography */
             --f-head: 'Playfair Display', serif;
             --f-body: 'Lato', sans-serif;
 
+            /* Animation */
+            --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+            --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
             --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            --ease-smooth: cubic-bezier(0.4, 0.0, 0.2, 1);
-            --dur-entry: 800ms;
+
+            --anim-entry-dur: 1.2s;
+            --anim-delay-base: 0.2s;
         }
 
+        /* Reset & Base */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body, html {
@@ -48,22 +62,39 @@
             font-family: var(--f-body);
             color: var(--c-text-main);
             overflow: hidden;
+            font-size: 16px;
         }
 
-        /* Map Styling */
-        #map {
-            height: 100%;
+        /* Map Container & Effects */
+        #map-container {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            opacity: 0;
-            background: var(--c-bg);
-            transition: opacity 1s ease-out;
+            height: 100%;
             z-index: 1;
+            opacity: 0;
+            animation: fadeIn 1.5s var(--ease-out-quart) forwards;
         }
 
-        /* Tint the map tiles to match the pastel theme */
+        /* Vignette Overlay */
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+            background: radial-gradient(circle at center, transparent 0%, rgba(240, 244, 248, 0.0) 60%, rgba(240, 244, 248, 0.3) 100%);
+            mix-blend-mode: multiply;
+        }
+
+        /* Leaflet Tile Styling */
         .leaflet-tile-pane {
-            /* Subtle blue/purple shift for sea/sky vibe */
-            filter: grayscale(100%) sepia(8%) hue-rotate(190deg) brightness(102%) contrast(92%);
+            /* Dreamy, desaturated, slightly teal-tinted */
+            filter: grayscale(100%) sepia(15%) hue-rotate(170deg) brightness(105%) contrast(90%);
+            transition: filter 1s ease;
         }
 
         /* UI Layer */
@@ -78,70 +109,85 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 2.5rem;
+            padding: 3rem;
         }
 
-        /* Glassmorphism Card Utility */
-        .glass-card {
-            background: var(--c-glass);
-            backdrop-filter: blur(20px) saturate(140%);
-            -webkit-backdrop-filter: blur(20px) saturate(140%);
-            border: 1px solid var(--c-glass-border);
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.8),
-                0 4px 20px rgba(0, 0, 0, 0.03),
-                0 20px 40px rgba(0, 0, 0, 0.04);
-            border-radius: 20px;
+        /* Glass Component */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            border-radius: 24px;
         }
 
         /* Header */
         header {
             pointer-events: auto;
             align-self: flex-start;
-            padding: 1.8rem 2.5rem;
+            padding: 2rem 3rem;
             opacity: 0;
-            transform: translateY(-20px);
-            animation: slideDown var(--dur-entry) var(--ease-smooth) 200ms forwards;
+            transform: translateY(-30px);
+            animation: slideDownFade 1s var(--ease-out-quart) var(--anim-delay-base) forwards;
+            max-width: 600px;
         }
 
         h1 {
             font-family: var(--f-head);
             font-weight: 700;
-            font-size: 2.4rem;
+            font-size: 3rem;
             color: var(--c-text-main);
-            line-height: 1;
-            letter-spacing: -0.03em;
-            margin-bottom: 0.2rem;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--c-text-main) 0%, #4A5568 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .subtitle {
-            display: block;
+            display: flex;
+            align-items: center;
             font-family: var(--f-body);
             font-weight: 400;
-            font-size: 0.85rem;
-            color: var(--c-text-sec);
-            letter-spacing: 0.15em;
+            font-size: 0.9rem;
+            color: var(--c-accent-cool);
+            letter-spacing: 0.2em;
             text-transform: uppercase;
-            opacity: 0.8;
+        }
+
+        .subtitle::before {
+            content: '';
+            display: block;
+            width: 2rem;
+            height: 1px;
+            background: var(--c-accent-cool);
+            margin-right: 1rem;
+            opacity: 0.6;
         }
 
         /* Info Panel */
         .info-panel {
+            align-self: flex-end; /* Changed to flex-end for better desktop layout usually, but staying left aligned */
             align-self: flex-start;
-            width: 380px;
-            max-width: 88vw;
+            width: 420px;
+            max-width: 90vw;
+            min-height: 200px;
             padding: 2.5rem;
             opacity: 0;
-            transform: translateY(20px) scale(0.98);
-            transition: all 0.6s var(--ease-smooth);
-            pointer-events: auto;
+            transform: translateY(30px) scale(0.95);
+            transition: all 0.6s var(--ease-out-quart);
+            pointer-events: none; /* Hidden by default effectively */
+            visibility: hidden;
             position: relative;
-            will-change: transform, opacity;
         }
 
         .info-panel.active {
             opacity: 1;
             transform: translateY(0) scale(1);
+            pointer-events: auto;
+            visibility: visible;
         }
 
         .panel-content {
@@ -151,176 +197,250 @@
 
         .info-title {
             font-family: var(--f-head);
-            font-size: 1.8rem;
-            font-weight: 500;
-            margin-bottom: 1rem;
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
             color: var(--c-text-main);
-            letter-spacing: -0.01em;
             line-height: 1.1;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s ease 0.1s;
         }
 
         .info-body {
-            font-size: 1.05rem;
-            line-height: 1.6;
-            color: var(--c-text-sec);
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: var(--c-text-light);
             font-weight: 300;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s ease 0.2s;
         }
 
+        .info-panel.active .info-title,
+        .info-panel.active .info-body {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Close Button */
         .panel-close {
             position: absolute;
-            top: 1.2rem;
-            right: 1.2rem;
-            width: 32px;
-            height: 32px;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 36px;
+            height: 36px;
             cursor: pointer;
-            opacity: 0.4;
-            transition: all 0.2s;
+            opacity: 0.5;
+            transition: all 0.3s ease;
             border-radius: 50%;
-            background: rgba(0,0,0,0.03);
+            background: rgba(0,0,0,0.04);
             display: flex;
             align-items: center;
             justify-content: center;
-            border: none;
-            padding: 0;
+            border: 1px solid transparent;
             outline: none;
         }
-        .panel-close:hover, .panel-close:focus {
+        .panel-close:hover {
             opacity: 1;
-            background: rgba(0,0,0,0.08);
-            transform: scale(1.1);
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform: rotate(90deg);
         }
         .panel-close:focus-visible {
             box-shadow: 0 0 0 2px var(--c-accent-cool);
+            border-color: var(--c-accent-cool);
         }
         .panel-close svg {
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             fill: var(--c-text-main);
-            pointer-events: none;
         }
 
-        /* Markers */
+        /* Custom Markers */
         .custom-marker {
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: z-index 0.1s;
             will-change: transform;
         }
 
+        .marker-container {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s var(--ease-elastic);
+        }
+
+        .marker-container:hover {
+            transform: scale(1.15);
+            z-index: 1000;
+        }
+
         .pin {
-            width: 18px;
-            height: 18px;
-            background: var(--c-accent-warm);
+            width: 16px;
+            height: 16px;
+            background: var(--c-surface);
+            border: 4px solid var(--c-accent-warm);
             border-radius: 50%;
             position: relative;
-            box-shadow: 0 4px 12px rgba(246, 173, 85, 0.4);
-            transition: transform 0.4s var(--ease-elastic), background 0.3s;
             z-index: 2;
-            border: 2px solid #FFF;
+            box-shadow: 0 4px 10px rgba(221, 107, 32, 0.4);
+            transition: all 0.3s ease;
         }
 
-        /* Enhanced Focus for Markers (Accessibility) */
-        .pin:focus-visible {
-            box-shadow: 0 0 0 3px var(--c-accent-cool);
+        .marker-container:focus-visible .pin {
             outline: none;
+            box-shadow: 0 0 0 4px rgba(221, 107, 32, 0.3);
+            border-color: var(--c-text-main);
         }
 
-        .pulse {
+        .marker-pulse {
             position: absolute;
-            width: 60px;
-            height: 60px;
-            background: rgba(246, 173, 85, 0.25);
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
+            border: 1px solid var(--c-accent-warm);
+            opacity: 0;
             z-index: 1;
-            animation: pulse 4s infinite ease-out;
-            pointer-events: none;
+            animation: pulse-ring 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
         }
 
-        .custom-marker:hover .pin {
-            transform: scale(1.3);
-            background: var(--c-accent-cool);
-            box-shadow: 0 6px 20px rgba(56, 178, 172, 0.4);
-            border-color: #F0F4F8;
+        .marker-pulse:nth-child(2) {
+            animation-delay: 0.8s;
         }
 
-        .custom-marker:hover .pulse {
-            background: rgba(56, 178, 172, 0.2);
-            animation-duration: 2s;
+        /* Marker Active State */
+        .custom-marker.active-state .pin {
+            background: var(--c-accent-warm);
+            border-color: var(--c-surface);
+            transform: scale(1.2);
+        }
+        .custom-marker.active-state .marker-pulse {
+            animation: none;
+            border-color: var(--c-accent-cool);
+            background: rgba(49, 151, 149, 0.1);
+            transform: scale(1.5);
+            opacity: 1;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(0.2); opacity: 0.8; }
-            50% { opacity: 0.4; }
-            100% { transform: scale(1.2); opacity: 0; }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: scale(1.8); opacity: 0; }
         }
 
-        @keyframes slideDown {
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDownFade {
+            from { opacity: 0; transform: translateY(-40px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Zoom Controls Override */
+        /* Zoom Control Customization */
         .leaflet-control-zoom {
             border: none !important;
             margin-bottom: 3rem !important;
             margin-right: 3rem !important;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
         .leaflet-control-zoom a {
-            background: var(--c-glass) !important;
-            backdrop-filter: blur(10px) !important;
+            background: var(--glass-bg) !important;
+            backdrop-filter: var(--glass-blur) !important;
+            -webkit-backdrop-filter: var(--glass-blur) !important;
             color: var(--c-text-main) !important;
-            border: 1px solid var(--c-glass-border) !important;
-            border-radius: 12px !important;
-            width: 48px !important;
-            height: 48px !important;
-            line-height: 48px !important;
-            margin-bottom: 12px !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 50% !important; /* Circle buttons */
+            width: 44px !important;
+            height: 44px !important;
+            line-height: 44px !important;
+            box-shadow: var(--glass-shadow) !important;
             font-weight: 300 !important;
-            font-size: 1.4rem !important;
-            transition: all 0.2s !important;
+            font-size: 1.5rem !important;
+            transition: all 0.3s ease !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
         .leaflet-control-zoom a:hover {
-            background: #FFF !important;
+            background: #fff !important;
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08) !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+            color: var(--c-accent-cool) !important;
+        }
+        .leaflet-control-zoom a:focus-visible {
+            outline: 2px solid var(--c-accent-cool) !important;
+            outline-offset: 2px;
         }
 
         /* Attribution */
         .leaflet-control-attribution {
-            background: transparent !important;
+            background: rgba(255,255,255,0.4) !important;
+            backdrop-filter: blur(4px);
+            padding: 4px 8px !important;
+            border-radius: 4px;
             font-family: var(--f-body);
-            color: var(--c-text-sec);
-            opacity: 0.5;
-            margin-right: 1.5rem;
-            margin-bottom: 0.8rem;
+            color: var(--c-text-light) !important;
             font-size: 0.7rem !important;
+            margin-right: 1rem;
+            margin-bottom: 0.5rem;
         }
         .leaflet-control-attribution a {
-            color: var(--c-text-sec) !important;
+            color: var(--c-text-main) !important;
             text-decoration: none;
+            font-weight: 600;
         }
 
         /* Responsive */
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             .ui-layer { padding: 1.5rem; }
-            header { padding: 1.2rem 1.5rem; }
-            h1 { font-size: 1.8rem; }
-            .info-panel { width: 100%; bottom: 0; padding: 1.5rem; }
-            .leaflet-control-zoom { display: none; } /* Hide zoom on mobile */
+
+            header {
+                padding: 1.5rem;
+                width: 100%;
+                max-width: none;
+            }
+            h1 { font-size: 2rem; }
+
+            .info-panel {
+                width: calc(100% - 3rem);
+                bottom: 1.5rem;
+                padding: 1.5rem;
+                position: absolute; /* Force it to bottom */
+                bottom: 1.5rem;
+                left: 1.5rem;
+            }
+
+            .info-title { font-size: 1.6rem; }
+            .info-body { font-size: 1rem; }
+
+            /* On Mobile, hide zoom controls to save space */
+            .leaflet-control-zoom { display: none; }
         }
     </style>
 </head>
 <body>
-    <div id="map" aria-label="Map of Mamallapuram" role="application"></div>
+    <div id="map-container">
+        <div id="map" style="height: 100%; width: 100%;" role="application" aria-label="Interactive Map of Mamallapuram"></div>
+        <div class="vignette"></div>
+    </div>
 
     <div class="ui-layer">
-        <header class="glass-card">
+        <header class="glass">
             <h1>Mamallapuram</h1>
-            <span class="subtitle">Stone. Salt. Silence.</span>
+            <span class="subtitle">Stone &bull; Salt &bull; Silence</span>
         </header>
 
-        <aside id="panel" class="info-panel glass-card" aria-labelledby="panel-title">
+        <aside id="panel" class="info-panel glass" aria-labelledby="panel-title" aria-hidden="true">
             <button class="panel-close" id="panel-close" aria-label="Close details">
                 <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
             </button>
@@ -332,68 +452,82 @@
     </div>
 
     <script>
+        // Data
         const locations = [
             {
                 name: "Shore Temple",
                 coords: [12.6111, 80.1973],
-                text: "Granite against the tide. The last of seven pagodas, standing where the ocean ends, bearing witness to centuries of monsoons and trade."
+                text: "Standing defiant against the Bay of Bengal since the 8th century, this granite structural temple captures the first light of dawn. It is the last survivor of the legendary Seven Pagodas."
             },
             {
                 name: "Descent of the Ganges",
                 coords: [12.6163, 80.1918],
-                text: "A canvas of living rock. Elephants, gods, and ascetics frozen in a moment of celestial arrival, carved with a breathing realism."
+                text: "A masterpiece of narrative art carved into two giant boulders. It depicts the celestial river Ganges descending from the heavens, witnessed by gods, animals, and sages in intricate detail."
             },
             {
                 name: "Krishna’s Butter Ball",
                 coords: [12.6175, 80.1923],
-                text: "Improbable balance. A colossal monolith resting on a slope, defying gravity and the urge to roll, playful yet immovable."
+                text: "Vaanirai Kal (Stone of Sky God) is a 250-ton rock perched precariously on a slope. Defying gravity and attempts to move it, it remains a playful enigma of nature."
             },
             {
                 name: "Pancha Rathas",
                 coords: [12.6083, 80.1894],
-                text: "Chariots of stone. Five monolithic structures, each carved from a single rock, standing as eternal testaments to Pallava architecture."
+                text: "Five monolithic pyramidal structures named after the Pandavas. Carved from a single large rock, these 'chariots' showcase the evolution of Dravidian architecture."
             },
             {
                 name: "Mahabalipuram Lighthouse",
                 coords: [12.6144, 80.1947],
-                text: "A silent watch over the Coromandel coast. Its light cuts through the salt air, guiding ships past the ancient granite shores."
+                text: "A beacon guiding sailors since 1904. Climb the spiral stairs for a panoramic view of the ancient town, the shimmering ocean, and the spread of casuarina trees."
             }
         ];
 
+        // Map Initialization
         const map = L.map('map', {
             center: [12.6140, 80.1935],
             zoom: 15,
             minZoom: 14,
             maxZoom: 18,
             zoomControl: false,
-            attributionControl: true
+            attributionControl: true,
+            scrollWheelZoom: 'center' /* Better UX */
         });
 
+        // Controls
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
+        // Tiles
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
             subdomains: 'abcd',
             maxZoom: 20
         }).addTo(map);
 
+        // UI References
         const panel = document.getElementById('panel');
         const panelTitle = document.getElementById('panel-title');
         const panelBody = document.getElementById('panel-body');
         const panelCloseBtn = document.getElementById('panel-close');
 
-        let activeMarker = null;
+        let activeMarkerName = null;
         const markers = {};
 
-        // Helper to escape HTML for attributes
-        const escapeHtml = (str) => {
-            return str.replace(/"/g, '&quot;');
-        };
+        // Helper: Escape HTML
+        const escapeHtml = (str) => str.replace(/[&<>"']/g,
+            tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[tag]));
 
+        // Marker Logic
         locations.forEach(loc => {
             const icon = L.divIcon({
                 className: 'custom-marker',
-                html: `<div class="pulse"></div><div class="pin" role="button" tabindex="0" aria-label="${escapeHtml(loc.name)}"></div>`,
+                html: `
+                    <div class="marker-container" role="button" tabindex="0" aria-label="View details for ${escapeHtml(loc.name)}">
+                        <div class="marker-pulse"></div>
+                        <div class="marker-pulse"></div>
+                        <div class="pin"></div>
+                    </div>
+                `,
                 iconSize: [40, 40],
                 iconAnchor: [20, 20]
             });
@@ -401,120 +535,100 @@
             const marker = L.marker(loc.coords, { icon: icon });
             markers[loc.name] = marker;
 
+            // Interaction Handler
+            const activate = (e) => {
+                const isKeyboard = e.type === 'keydown' || (e.originalEvent && e.originalEvent.type === 'keydown');
+
+                // Visual update
+                Object.values(markers).forEach(m => {
+                    m.getElement().classList.remove('active-state');
+                });
+                marker.getElement().classList.add('active-state');
+
+                // Map Fly
+                const isMobile = window.innerWidth < 768;
+                // Shift center slightly to accommodate panel
+                const offset = isMobile ? [0, -100] : [150, 0];
+                const targetZoom = Math.max(map.getZoom(), 16);
+
+                // Calculate offset center
+                const targetPoint = map.project(loc.coords, targetZoom).subtract(offset);
+                const targetLatLng = map.unproject(targetPoint, targetZoom);
+
+                map.flyTo(targetLatLng, targetZoom, {
+                    animate: true,
+                    duration: 1.5,
+                    easeLinearity: 0.1
+                });
+
+                showPanel(loc, isKeyboard);
+                L.DomEvent.stopPropagation(e);
+            };
+
+            marker.on('click', activate);
+
+            // Accessibility: Keyboard support attached to DOM element once added
             marker.on('add', () => {
                 const el = marker.getElement();
-                if (el) {
-                    el.addEventListener('keydown', (e) => {
-                        // Allow Enter or Space to activate
+                const container = el.querySelector('.marker-container');
+                if (container) {
+                    container.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
-                            if (e.key === ' ') e.preventDefault(); // Prevent scrolling
-                            marker.fire('click', { isKeyboard: true });
+                            e.preventDefault();
+                            activate(e);
                         }
                     });
                 }
             });
 
             marker.addTo(map);
-
-            marker.on('click', (e) => {
-                // Modified: Allow click to proceed even if active (to re-center),
-                // or handle checking inside logic if we want to avoid re-animation strictly,
-                // but "Expert" approach suggests robustness.
-                // We will let showPanel handle the idempotency of DOM,
-                // but allow the map to flyTo if user clicked.
-
-                // If it's a keyboard event, e.originalEvent might be undefined or different
-                // depending on how we fired it.
-                // We passed { isKeyboard: true } in the fire call.
-
-                const isKeyboard = e.isKeyboard === true;
-
-                const isMobile = window.innerWidth < 600;
-                // Offset: negative Y moves center down, putting marker UP (above bottom panel)
-                const offset = isMobile ? [0, -150] : [150, 0];
-
-                const targetZoom = Math.max(map.getZoom(), 16);
-                const targetPoint = map.project(e.latlng, targetZoom).subtract(offset);
-                const targetLatLng = map.unproject(targetPoint, targetZoom);
-
-                map.flyTo(targetLatLng, targetZoom, {
-                    animate: true,
-                    duration: 1.2,
-                    easeLinearity: 0.25
-                });
-                showPanel(loc, isKeyboard);
-                L.DomEvent.stopPropagation(e);
-            });
-
-            marker.on('mouseover', function() { this.setZIndexOffset(1000); });
-            marker.on('mouseout', function() {
-                if (activeMarker !== loc.name) {
-                    this.setZIndexOffset(0);
-                }
-            });
         });
 
-        function showPanel(data, isKeyboard = false) {
-            // Even if active, we might want to ensure focus if keyboard was used again
-            if (activeMarker === data.name && panel.classList.contains('active')) {
-                if (isKeyboard) {
-                   panelCloseBtn.focus();
-                }
-                return;
-            }
-
-            if (activeMarker && markers[activeMarker]) {
-                markers[activeMarker].setZIndexOffset(0);
-            }
-
+        // Panel Logic
+        function showPanel(data, isKeyboard) {
             panelTitle.innerText = data.name;
             panelBody.innerText = data.text;
+
             panel.classList.add('active');
-            activeMarker = data.name;
+            panel.setAttribute('aria-hidden', 'false');
+            activeMarkerName = data.name;
 
-            if (markers[activeMarker]) {
-                markers[activeMarker].setZIndexOffset(1000);
-            }
-
-            // Focus Management
             if (isKeyboard) {
-                // Move focus to close button for accessibility
-                // Small timeout to allow transition/rendering if needed,
-                // but usually immediate focus is fine.
-                // However, if panel was display:none, we'd need to wait.
-                // Here it is opacity/transform, so it's in DOM.
-                panelCloseBtn.focus();
+                setTimeout(() => panelCloseBtn.focus(), 100);
             }
         }
 
         function hidePanel() {
             if (!panel.classList.contains('active')) return;
 
-            const previousMarker = activeMarker; // Store before nulling
+            const prevMarkerName = activeMarkerName;
 
             panel.classList.remove('active');
-            if (activeMarker && markers[activeMarker]) {
-                markers[activeMarker].setZIndexOffset(0);
-            }
-            activeMarker = null;
+            panel.setAttribute('aria-hidden', 'true');
+            activeMarkerName = null;
 
-            // Focus Management: Return focus to the marker
-            if (previousMarker && markers[previousMarker]) {
-                const markerEl = markers[previousMarker].getElement();
-                if (markerEl) {
-                    const pin = markerEl.querySelector('.pin');
-                    if (pin) pin.focus();
-                }
+            // Reset marker visuals
+            Object.values(markers).forEach(m => {
+                if(m.getElement()) m.getElement().classList.remove('active-state');
+            });
+
+            // Return focus
+            if (prevMarkerName && markers[prevMarkerName]) {
+                const el = markers[prevMarkerName].getElement();
+                const container = el ? el.querySelector('.marker-container') : null;
+                if (container) container.focus();
             }
         }
 
+        // Event Listeners
         panelCloseBtn.addEventListener('click', hidePanel);
+        map.on('click', hidePanel);
 
-        map.on('click', () => hidePanel());
+        // Map Click Accessibility (ESC to clear selection)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') hidePanel();
+        });
 
-        window.onload = () => {
-            document.getElementById('map').style.opacity = '1';
-        };
     </script>
 </body>
 </html>
