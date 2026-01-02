@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mamallapuram | Coastal Serenity</title>
 
     <!-- Fonts -->
@@ -220,6 +220,12 @@
             border: 2px solid #FFF;
         }
 
+        /* Enhanced Focus for Markers (Accessibility) */
+        .pin:focus-visible {
+            box-shadow: 0 0 0 3px var(--c-accent-cool);
+            outline: none;
+        }
+
         .pulse {
             position: absolute;
             width: 60px;
@@ -314,15 +320,15 @@
             <span class="subtitle">Stone. Salt. Silence.</span>
         </header>
 
-        <div id="panel" class="info-panel glass-card">
-            <button class="panel-close" onclick="hidePanel()" aria-label="Close details">
+        <aside id="panel" class="info-panel glass-card" aria-labelledby="panel-title">
+            <button class="panel-close" id="panel-close" aria-label="Close details">
                 <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
             </button>
             <div class="panel-content">
                 <div class="info-title" id="panel-title"></div>
                 <div class="info-body" id="panel-body"></div>
             </div>
-        </div>
+        </aside>
     </div>
 
     <script>
@@ -374,13 +380,20 @@
         const panel = document.getElementById('panel');
         const panelTitle = document.getElementById('panel-title');
         const panelBody = document.getElementById('panel-body');
+        const panelCloseBtn = document.getElementById('panel-close');
+
         let activeMarker = null;
         const markers = {};
+
+        // Helper to escape HTML for attributes
+        const escapeHtml = (str) => {
+            return str.replace(/"/g, '&quot;');
+        };
 
         locations.forEach(loc => {
             const icon = L.divIcon({
                 className: 'custom-marker',
-                html: `<div class="pulse"></div><div class="pin" role="button" tabindex="0" aria-label="${loc.name}"></div>`,
+                html: `<div class="pulse"></div><div class="pin" role="button" tabindex="0" aria-label="${escapeHtml(loc.name)}"></div>`,
                 iconSize: [40, 40],
                 iconAnchor: [20, 20]
             });
@@ -392,8 +405,10 @@
                 const el = marker.getElement();
                 if (el) {
                     el.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter') {
-                            marker.fire('click');
+                        // Allow Enter or Space to activate
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            if (e.key === ' ') e.preventDefault(); // Prevent scrolling
+                            marker.fire('click', { isKeyboard: true });
                         }
                     });
                 }
@@ -402,7 +417,17 @@
             marker.addTo(map);
 
             marker.on('click', (e) => {
-                if (activeMarker === loc.name) return;
+                // Modified: Allow click to proceed even if active (to re-center),
+                // or handle checking inside logic if we want to avoid re-animation strictly,
+                // but "Expert" approach suggests robustness.
+                // We will let showPanel handle the idempotency of DOM,
+                // but allow the map to flyTo if user clicked.
+
+                // If it's a keyboard event, e.originalEvent might be undefined or different
+                // depending on how we fired it.
+                // We passed { isKeyboard: true } in the fire call.
+
+                const isKeyboard = e.isKeyboard === true;
 
                 const isMobile = window.innerWidth < 600;
                 // Offset: negative Y moves center down, putting marker UP (above bottom panel)
@@ -417,7 +442,7 @@
                     duration: 1.2,
                     easeLinearity: 0.25
                 });
-                showPanel(loc);
+                showPanel(loc, isKeyboard);
                 L.DomEvent.stopPropagation(e);
             });
 
@@ -429,8 +454,14 @@
             });
         });
 
-        function showPanel(data) {
-            if (activeMarker === data.name && panel.classList.contains('active')) return;
+        function showPanel(data, isKeyboard = false) {
+            // Even if active, we might want to ensure focus if keyboard was used again
+            if (activeMarker === data.name && panel.classList.contains('active')) {
+                if (isKeyboard) {
+                   panelCloseBtn.focus();
+                }
+                return;
+            }
 
             if (activeMarker && markers[activeMarker]) {
                 markers[activeMarker].setZIndexOffset(0);
@@ -444,15 +475,40 @@
             if (markers[activeMarker]) {
                 markers[activeMarker].setZIndexOffset(1000);
             }
+
+            // Focus Management
+            if (isKeyboard) {
+                // Move focus to close button for accessibility
+                // Small timeout to allow transition/rendering if needed,
+                // but usually immediate focus is fine.
+                // However, if panel was display:none, we'd need to wait.
+                // Here it is opacity/transform, so it's in DOM.
+                panelCloseBtn.focus();
+            }
         }
 
         function hidePanel() {
+            if (!panel.classList.contains('active')) return;
+
+            const previousMarker = activeMarker; // Store before nulling
+
             panel.classList.remove('active');
             if (activeMarker && markers[activeMarker]) {
                 markers[activeMarker].setZIndexOffset(0);
             }
             activeMarker = null;
+
+            // Focus Management: Return focus to the marker
+            if (previousMarker && markers[previousMarker]) {
+                const markerEl = markers[previousMarker].getElement();
+                if (markerEl) {
+                    const pin = markerEl.querySelector('.pin');
+                    if (pin) pin.focus();
+                }
+            }
         }
+
+        panelCloseBtn.addEventListener('click', hidePanel);
 
         map.on('click', () => hidePanel());
 
