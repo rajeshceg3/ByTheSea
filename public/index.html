@@ -2,53 +2,65 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Mamallapuram | Coastal Serenity</title>
     <meta name="description" content="An immersive journey through the stone and silence of Mamallapuram.">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <style>
+        /*
+         * DESIGN SYSTEM: Coastal Serenity
+         * Theme: Ethereal, Sophisticated, Organic
+         */
         :root {
-            /* Palette: Coastal Serenity Refined */
-            --c-bg: #F0F4F8;
-            --c-surface: #ffffff;
-            --c-text-main: #2D3748;
-            --c-text-light: #718096;
+            /* Palette - Refined Pastel */
+            --c-bg: #F5F7FA;
+            --c-surface: #FFFFFF;
 
-            --c-accent-warm: #DD6B20; /* Burnt Orange */
-            --c-accent-warm-soft: #FBD38D;
-            --c-accent-cool: #319795; /* Teal */
-            --c-accent-cool-soft: #B2F5EA;
+            /* Text Colors */
+            --c-text-primary: #2D3748;
+            --c-text-secondary: #718096;
+            --c-text-accent: #319795; /* Teal */
 
-            /* Glassmorphism */
-            --glass-bg: rgba(255, 255, 255, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.4);
-            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-            --glass-blur: blur(20px);
+            /* Accents */
+            --c-accent-warm: #ED8936; /* Soft Orange */
+            --c-accent-warm-light: #FEEBC8;
+            --c-accent-cool: #38B2AC; /* Teal */
+            --c-accent-cool-light: #E6FFFA;
+
+            /* Glassmorphism Variables */
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-shadow:
+                0 4px 6px -1px rgba(0, 0, 0, 0.02),
+                0 2px 4px -1px rgba(0, 0, 0, 0.02),
+                0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            --glass-blur: blur(16px);
 
             /* Typography */
-            --f-head: 'Playfair Display', serif;
+            --f-display: 'Playfair Display', serif;
             --f-body: 'Lato', sans-serif;
 
-            /* Animation */
-            --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
-            --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-            --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            /* Transitions */
+            --ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+            --ease-smooth: cubic-bezier(0.4, 0.0, 0.2, 1);
 
-            --anim-entry-dur: 1.2s;
-            --anim-delay-base: 0.2s;
+            /* Spacing */
+            --space-unit: clamp(1rem, 2vw, 2rem);
         }
 
-        /* Reset & Base */
-        * {
+        /*
+         * RESET & BASE
+         */
+        *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
@@ -58,14 +70,18 @@
         body, html {
             height: 100%;
             width: 100%;
+            overflow: hidden;
             background-color: var(--c-bg);
             font-family: var(--f-body);
-            color: var(--c-text-main);
-            overflow: hidden;
+            color: var(--c-text-primary);
             font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Map Container & Effects */
+        /*
+         * MAP CONTAINER & STYLING
+         */
         #map-container {
             position: absolute;
             top: 0;
@@ -74,385 +90,369 @@
             height: 100%;
             z-index: 1;
             opacity: 0;
-            animation: fadeIn 1.5s var(--ease-out-quart) forwards;
+            animation: revealMap 1.5s var(--ease-smooth) forwards;
         }
 
-        /* Vignette Overlay */
-        .vignette {
-            position: absolute;
+        /* SVG Noise Overlay for Texture */
+        .texture-overlay {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 2;
-            background: radial-gradient(circle at center, transparent 0%, rgba(240, 244, 248, 0.0) 60%, rgba(240, 244, 248, 0.3) 100%);
-            mix-blend-mode: multiply;
+            z-index: 5;
+            opacity: 0.07;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        /* Leaflet Tile Styling */
+        /* Map Tiles Custom Filter */
         .leaflet-tile-pane {
-            /* Dreamy, desaturated, slightly teal-tinted */
-            filter: grayscale(100%) sepia(15%) hue-rotate(170deg) brightness(105%) contrast(90%);
-            transition: filter 1s ease;
+            filter: grayscale(1) brightness(1.05) contrast(0.95) sepia(0.2) hue-rotate(180deg) saturate(0.5);
+            transition: filter 0.5s ease;
         }
 
-        /* UI Layer */
+        /*
+         * UI LAYOUT
+         */
         .ui-layer {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            z-index: 10;
             pointer-events: none;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 3rem;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            grid-template-columns: 1fr;
+            padding: var(--space-unit);
         }
 
-        /* Glass Component */
-        .glass {
+        /*
+         * COMPONENTS
+         */
+
+        /* Header */
+        .header-container {
+            grid-row: 1;
+            justify-self: start;
+            pointer-events: auto;
+            max-width: 500px;
+            opacity: 0;
+            animation: slideDown 1s var(--ease-smooth) 0.5s forwards;
+        }
+
+        .brand-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem 2.5rem;
+            box-shadow: var(--glass-shadow);
+        }
+
+        h1 {
+            font-family: var(--f-display);
+            font-weight: 700;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            color: var(--c-text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .subtitle {
+            font-family: var(--f-body);
+            font-size: 0.85rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            color: var(--c-text-accent);
+            display: flex;
+            align-items: center;
+        }
+
+        .subtitle::before {
+            content: '';
+            display: block;
+            width: 30px;
+            height: 1px;
+            background-color: var(--c-text-accent);
+            margin-right: 15px;
+            opacity: 0.7;
+        }
+
+        /* Info Panel (Bottom Sheet on Mobile, Floating Card on Desktop) */
+        .panel-container {
+            grid-row: 2 / -1; /* Spans to bottom */
+            align-self: end;
+            justify-self: start;
+            width: 100%;
+            max-width: 440px;
+            pointer-events: none; /* Container is passive */
+        }
+
+        .info-card {
             background: var(--glass-bg);
             backdrop-filter: var(--glass-blur);
             -webkit-backdrop-filter: var(--glass-blur);
             border: 1px solid var(--glass-border);
             box-shadow: var(--glass-shadow);
             border-radius: 24px;
-        }
-
-        /* Header */
-        header {
-            pointer-events: auto;
-            align-self: flex-start;
-            padding: 2rem 3rem;
-            opacity: 0;
-            transform: translateY(-30px);
-            animation: slideDownFade 1s var(--ease-out-quart) var(--anim-delay-base) forwards;
-            max-width: 600px;
-        }
-
-        h1 {
-            font-family: var(--f-head);
-            font-weight: 700;
-            font-size: 3rem;
-            color: var(--c-text-main);
-            line-height: 1.1;
-            letter-spacing: -0.02em;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, var(--c-text-main) 0%, #4A5568 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .subtitle {
-            display: flex;
-            align-items: center;
-            font-family: var(--f-body);
-            font-weight: 400;
-            font-size: 0.9rem;
-            color: var(--c-accent-cool);
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-        }
-
-        .subtitle::before {
-            content: '';
-            display: block;
-            width: 2rem;
-            height: 1px;
-            background: var(--c-accent-cool);
-            margin-right: 1rem;
-            opacity: 0.6;
-        }
-
-        /* Info Panel */
-        .info-panel {
-            align-self: flex-end; /* Changed to flex-end for better desktop layout usually, but staying left aligned */
-            align-self: flex-start;
-            width: 420px;
-            max-width: 90vw;
-            min-height: 200px;
             padding: 2.5rem;
-            opacity: 0;
-            transform: translateY(30px) scale(0.95);
-            transition: all 0.6s var(--ease-out-quart);
-            pointer-events: none; /* Hidden by default effectively */
-            visibility: hidden;
+            pointer-events: auto;
             position: relative;
+
+            /* Hidden State */
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+            visibility: hidden;
+            transition: all 0.5s var(--ease-smooth);
         }
 
-        .info-panel.active {
+        .info-card.active {
             opacity: 1;
             transform: translateY(0) scale(1);
-            pointer-events: auto;
             visibility: visible;
         }
 
-        .panel-content {
-            position: relative;
-            z-index: 2;
-        }
-
         .info-title {
-            font-family: var(--f-head);
-            font-size: 2.2rem;
+            font-family: var(--f-display);
+            font-size: 2rem;
             font-weight: 600;
-            margin-bottom: 1.2rem;
-            color: var(--c-text-main);
-            line-height: 1.1;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.4s ease 0.1s;
+            color: var(--c-text-primary);
+            margin-bottom: 1rem;
+            line-height: 1.2;
         }
 
         .info-body {
-            font-size: 1.1rem;
-            line-height: 1.7;
-            color: var(--c-text-light);
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: var(--c-text-secondary);
             font-weight: 300;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.4s ease 0.2s;
         }
 
-        .info-panel.active .info-title,
-        .info-panel.active .info-body {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Close Button */
-        .panel-close {
+        .close-btn {
             position: absolute;
             top: 1.5rem;
             right: 1.5rem;
-            width: 36px;
-            height: 36px;
-            cursor: pointer;
-            opacity: 0.5;
-            transition: all 0.3s ease;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            background: rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.05);
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid transparent;
-            outline: none;
+            transition: all 0.3s ease;
+            color: var(--c-text-primary);
         }
-        .panel-close:hover {
-            opacity: 1;
+
+        .close-btn:hover {
             background: #fff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             transform: rotate(90deg);
-        }
-        .panel-close:focus-visible {
-            box-shadow: 0 0 0 2px var(--c-accent-cool);
-            border-color: var(--c-accent-cool);
-        }
-        .panel-close svg {
-            width: 16px;
-            height: 16px;
-            fill: var(--c-text-main);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        /* Custom Markers */
-        .custom-marker {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            will-change: transform;
-        }
-
-        .marker-container {
-            position: relative;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: transform 0.3s var(--ease-elastic);
-        }
-
-        .marker-container:hover {
-            transform: scale(1.15);
-            z-index: 1000;
-        }
-
-        .pin {
-            width: 16px;
-            height: 16px;
-            background: var(--c-surface);
-            border: 4px solid var(--c-accent-warm);
-            border-radius: 50%;
-            position: relative;
-            z-index: 2;
-            box-shadow: 0 4px 10px rgba(221, 107, 32, 0.4);
-            transition: all 0.3s ease;
-        }
-
-        .marker-container:focus-visible .pin {
-            outline: none;
-            box-shadow: 0 0 0 4px rgba(221, 107, 32, 0.3);
-            border-color: var(--c-text-main);
-        }
-
-        .marker-pulse {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 1px solid var(--c-accent-warm);
-            opacity: 0;
-            z-index: 1;
-            animation: pulse-ring 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-        }
-
-        .marker-pulse:nth-child(2) {
-            animation-delay: 0.8s;
-        }
-
-        /* Marker Active State */
-        .custom-marker.active-state .pin {
-            background: var(--c-accent-warm);
-            border-color: var(--c-surface);
-            transform: scale(1.2);
-        }
-        .custom-marker.active-state .marker-pulse {
-            animation: none;
-            border-color: var(--c-accent-cool);
-            background: rgba(49, 151, 149, 0.1);
-            transform: scale(1.5);
-            opacity: 1;
-        }
-
-        @keyframes pulse-ring {
-            0% { transform: scale(0.5); opacity: 0; }
-            50% { opacity: 0.5; }
-            100% { transform: scale(1.8); opacity: 0; }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideDownFade {
-            from { opacity: 0; transform: translateY(-40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Zoom Control Customization */
-        .leaflet-control-zoom {
-            border: none !important;
-            margin-bottom: 3rem !important;
-            margin-right: 3rem !important;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .leaflet-control-zoom a {
-            background: var(--glass-bg) !important;
-            backdrop-filter: var(--glass-blur) !important;
-            -webkit-backdrop-filter: var(--glass-blur) !important;
-            color: var(--c-text-main) !important;
-            border: 1px solid var(--glass-border) !important;
-            border-radius: 50% !important; /* Circle buttons */
-            width: 44px !important;
-            height: 44px !important;
-            line-height: 44px !important;
-            box-shadow: var(--glass-shadow) !important;
-            font-weight: 300 !important;
-            font-size: 1.5rem !important;
-            transition: all 0.3s ease !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-        }
-        .leaflet-control-zoom a:hover {
-            background: #fff !important;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
-            color: var(--c-accent-cool) !important;
-        }
-        .leaflet-control-zoom a:focus-visible {
-            outline: 2px solid var(--c-accent-cool) !important;
+        .close-btn:focus-visible {
+            outline: 2px solid var(--c-accent-cool);
             outline-offset: 2px;
         }
 
-        /* Attribution */
+        /*
+         * CUSTOM MARKERS
+         */
+        .custom-marker {
+            background: transparent;
+            will-change: transform;
+        }
+
+        .marker-wrapper {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.4s var(--ease-elastic);
+        }
+
+        .marker-wrapper:hover {
+            transform: scale(1.2);
+            z-index: 100;
+        }
+
+        .marker-dot {
+            width: 14px;
+            height: 14px;
+            background-color: var(--c-surface);
+            border: 3px solid var(--c-accent-warm);
+            border-radius: 50%;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .marker-ripple {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 1px solid var(--c-accent-warm);
+            border-radius: 50%;
+            opacity: 0;
+            animation: ripple 3s infinite;
+        }
+
+        .marker-ripple:nth-child(2) {
+            animation-delay: 1s;
+        }
+
+        /* Active Marker State */
+        .custom-marker.active-marker .marker-dot {
+            background-color: var(--c-accent-warm);
+            border-color: var(--c-surface);
+            transform: scale(1.3);
+        }
+
+        .custom-marker.active-marker .marker-ripple {
+            border-color: var(--c-accent-cool);
+            animation-duration: 2s;
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(0.4); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        /*
+         * ANIMATIONS
+         */
+        @keyframes revealMap {
+            from { opacity: 0; transform: scale(1.05); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /*
+         * LEAFLET OVERRIDES
+         */
+        .leaflet-control-zoom {
+            border: none !important;
+            margin: var(--space-unit) !important;
+            box-shadow: var(--glass-shadow) !important;
+        }
+
+        .leaflet-control-zoom a {
+            background: var(--glass-bg) !important;
+            color: var(--c-text-primary) !important;
+            backdrop-filter: var(--glass-blur);
+            border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+            width: 40px !important;
+            height: 40px !important;
+            line-height: 40px !important;
+            font-size: 1.25rem !important;
+            transition: all 0.2s;
+        }
+
+        .leaflet-control-zoom a:first-child { border-top-left-radius: 12px !important; border-top-right-radius: 12px !important; }
+        .leaflet-control-zoom a:last-child { border-bottom-left-radius: 12px !important; border-bottom-right-radius: 12px !important; }
+
+        .leaflet-control-zoom a:hover {
+            background: #fff !important;
+            color: var(--c-text-accent) !important;
+        }
+
         .leaflet-control-attribution {
-            background: rgba(255,255,255,0.4) !important;
-            backdrop-filter: blur(4px);
+            background: rgba(255,255,255,0.6) !important;
             padding: 4px 8px !important;
             border-radius: 4px;
-            font-family: var(--f-body);
-            color: var(--c-text-light) !important;
-            font-size: 0.7rem !important;
-            margin-right: 1rem;
-            margin-bottom: 0.5rem;
-        }
-        .leaflet-control-attribution a {
-            color: var(--c-text-main) !important;
-            text-decoration: none;
-            font-weight: 600;
+            font-size: 10px !important;
+            color: var(--c-text-secondary) !important;
         }
 
-        /* Responsive */
+        /*
+         * RESPONSIVE
+         */
         @media (max-width: 768px) {
-            .ui-layer { padding: 1.5rem; }
+            .ui-layer {
+                grid-template-rows: auto 1fr auto;
+                padding: 1rem;
+            }
 
-            header {
-                padding: 1.5rem;
+            .header-container {
+                max-width: 100%;
                 width: 100%;
-                max-width: none;
             }
-            h1 { font-size: 2rem; }
 
-            .info-panel {
-                width: calc(100% - 3rem);
-                bottom: 1.5rem;
+            .brand-card {
                 padding: 1.5rem;
-                position: absolute; /* Force it to bottom */
-                bottom: 1.5rem;
-                left: 1.5rem;
+                background: rgba(255,255,255,0.85); /* Slightly more opaque on mobile */
             }
 
-            .info-title { font-size: 1.6rem; }
-            .info-body { font-size: 1rem; }
+            h1 { margin-bottom: 0.5rem; }
 
-            /* On Mobile, hide zoom controls to save space */
+            .panel-container {
+                position: absolute; /* Take out of grid flow to force bottom */
+                bottom: 1rem;
+                left: 1rem;
+                right: 1rem;
+                width: auto;
+                max-width: none;
+                z-index: 100;
+            }
+
+            .info-card {
+                padding: 1.5rem 2rem;
+                max-height: 50vh;
+                overflow-y: auto;
+            }
+
             .leaflet-control-zoom { display: none; }
         }
     </style>
 </head>
 <body>
+
+    <!-- Texture Overlay for Grain Effect -->
+    <div class="texture-overlay"></div>
+
     <div id="map-container">
         <div id="map" style="height: 100%; width: 100%;" role="application" aria-label="Interactive Map of Mamallapuram"></div>
-        <div class="vignette"></div>
     </div>
 
     <div class="ui-layer">
-        <header class="glass">
-            <h1>Mamallapuram</h1>
-            <span class="subtitle">Stone &bull; Salt &bull; Silence</span>
+        <header class="header-container">
+            <div class="brand-card">
+                <h1>Mamallapuram</h1>
+                <div class="subtitle">Stone &bull; Salt &bull; Silence</div>
+            </div>
         </header>
 
-        <aside id="panel" class="info-panel glass" aria-labelledby="panel-title" aria-hidden="true">
-            <button class="panel-close" id="panel-close" aria-label="Close details">
-                <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-            </button>
-            <div class="panel-content">
-                <div class="info-title" id="panel-title"></div>
-                <div class="info-body" id="panel-body"></div>
-            </div>
-        </aside>
+        <div class="panel-container">
+            <aside id="info-panel" class="info-card" aria-hidden="true">
+                <button class="close-btn" id="close-panel" aria-label="Close details">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+                <h2 class="info-title" id="info-title">Title Here</h2>
+                <div class="info-body" id="info-body">
+                    Description goes here.
+                </div>
+            </aside>
+        </div>
     </div>
 
     <script>
-        // Data
+        // --- DATA ---
         const locations = [
             {
                 name: "Shore Temple",
@@ -481,7 +481,7 @@
             }
         ];
 
-        // Map Initialization
+        // --- INIT MAP ---
         const map = L.map('map', {
             center: [12.6140, 80.1935],
             zoom: 15,
@@ -489,98 +489,96 @@
             maxZoom: 18,
             zoomControl: false,
             attributionControl: true,
-            scrollWheelZoom: 'center' /* Better UX */
+            scrollWheelZoom: 'center'
         });
 
-        // Controls
+        // Add Zoom Control at bottom right
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-        // Tiles
+        // Tile Layer - CartoDB Light
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            attribution: '&copy; OpenStreetMap &copy; CARTO',
             subdomains: 'abcd',
             maxZoom: 20
         }).addTo(map);
 
-        // UI References
-        const panel = document.getElementById('panel');
-        const panelTitle = document.getElementById('panel-title');
-        const panelBody = document.getElementById('panel-body');
-        const panelCloseBtn = document.getElementById('panel-close');
+        // --- UI REFS ---
+        const panel = document.getElementById('info-panel');
+        const panelTitle = document.getElementById('info-title');
+        const panelBody = document.getElementById('info-body');
+        const closeBtn = document.getElementById('close-panel');
 
         let activeMarkerName = null;
         const markers = {};
 
-        // Helper: Escape HTML
-        const escapeHtml = (str) => str.replace(/[&<>"']/g,
-            tag => ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-            }[tag]));
-
-        // Marker Logic
+        // --- MARKER LOGIC ---
         locations.forEach(loc => {
             const icon = L.divIcon({
                 className: 'custom-marker',
                 html: `
-                    <div class="marker-container" role="button" tabindex="0" aria-label="View details for ${escapeHtml(loc.name)}">
-                        <div class="marker-pulse"></div>
-                        <div class="marker-pulse"></div>
-                        <div class="pin"></div>
+                    <div class="marker-wrapper" role="button" tabindex="0" aria-label="Explore ${loc.name}">
+                        <div class="marker-ripple"></div>
+                        <div class="marker-ripple"></div>
+                        <div class="marker-dot"></div>
                     </div>
                 `,
-                iconSize: [40, 40],
-                iconAnchor: [20, 20]
+                iconSize: [50, 50],
+                iconAnchor: [25, 25]
             });
 
+            // keyboard: false prevents Leaflet's default tab wrapper, letting us control focus
             const marker = L.marker(loc.coords, { icon: icon, keyboard: false });
             markers[loc.name] = marker;
 
-            // Interaction Handler
             const activate = (e) => {
+                // Determine if triggered by keyboard
                 const isKeyboard = e.type === 'keydown' || (e.originalEvent && e.originalEvent.type === 'keydown');
 
-                // Visual update
+                // Update visual state of all markers
                 Object.values(markers).forEach(m => {
                     const el = m.getElement();
-                    if (el) el.classList.remove('active-state');
+                    if(el) el.classList.remove('active-marker');
                 });
+
                 const currentEl = marker.getElement();
-                if (currentEl) currentEl.classList.add('active-state');
+                if(currentEl) currentEl.classList.add('active-marker');
 
-                // Map Fly
+                // Fly to location
                 const isMobile = window.innerWidth < 768;
-                // Shift center slightly to accommodate panel
-                const offset = isMobile ? [0, -100] : [150, 0];
-                const targetZoom = Math.max(map.getZoom(), 16);
 
-                // Calculate offset center
-                const targetPoint = map.project(loc.coords, targetZoom).subtract(offset);
-                const targetLatLng = map.unproject(targetPoint, targetZoom);
+                // Calculate target center to avoid panel occlusion
+                // On mobile: Panel is at bottom, so we shift map center down (positive Y)
+                // to make the marker appear higher up in the viewport.
+                const targetZoom = 16;
+                const targetPoint = map.project(loc.coords, targetZoom);
+                const offset = isMobile ? L.point(0, 150) : L.point(0, 0);
+                const targetCenter = map.unproject(targetPoint.add(offset), targetZoom);
 
-                map.flyTo(targetLatLng, targetZoom, {
+                map.flyTo(targetCenter, targetZoom, {
                     animate: true,
-                    duration: 1.5,
-                    easeLinearity: 0.1
+                    duration: 1.2,
+                    easeLinearity: 0.2
                 });
 
                 showPanel(loc, isKeyboard);
-                // Standardize event propagation (fixes fragile usage of Leaflet events)
+
+                // Stop propagation
                 const event = e.originalEvent || e;
-                L.DomEvent.stopPropagation(event);
+                if(event && event.stopPropagation) event.stopPropagation();
             };
 
             marker.on('click', activate);
 
-            // Accessibility: Keyboard support attached to DOM element once added
+            // Add listener for Keyboard Enter/Space
             marker.on('add', () => {
                 const el = marker.getElement();
-                // Restore state if marker was re-rendered
                 if (activeMarkerName === loc.name && el) {
-                    el.classList.add('active-state');
+                    el.classList.add('active-marker');
                 }
-                const container = el ? el.querySelector('.marker-container') : null;
-                if (container) {
-                    container.addEventListener('keydown', (e) => {
+
+                const wrapper = el ? el.querySelector('.marker-wrapper') : null;
+                if(wrapper) {
+                    wrapper.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
                             activate(e);
@@ -592,8 +590,8 @@
             marker.addTo(map);
         });
 
-        // Panel Logic
-        function showPanel(data, isKeyboard) {
+        // --- PANEL FUNCTIONS ---
+        function showPanel(data, shouldFocus) {
             panelTitle.innerText = data.name;
             panelBody.innerText = data.text;
 
@@ -601,38 +599,41 @@
             panel.setAttribute('aria-hidden', 'false');
             activeMarkerName = data.name;
 
-            if (isKeyboard) {
-                setTimeout(() => panelCloseBtn.focus(), 100);
+            if (shouldFocus) {
+                // Wait for transition
+                setTimeout(() => closeBtn.focus(), 150);
             }
         }
 
         function hidePanel() {
             if (!panel.classList.contains('active')) return;
 
-            const prevMarkerName = activeMarkerName;
-
+            const prevActive = activeMarkerName;
             panel.classList.remove('active');
             panel.setAttribute('aria-hidden', 'true');
             activeMarkerName = null;
 
-            // Reset marker visuals
+            // Clear marker active states
             Object.values(markers).forEach(m => {
-                if(m.getElement()) m.getElement().classList.remove('active-state');
+                const el = m.getElement();
+                if(el) el.classList.remove('active-marker');
             });
 
-            // Return focus
-            if (prevMarkerName && markers[prevMarkerName]) {
-                const el = markers[prevMarkerName].getElement();
-                const container = el ? el.querySelector('.marker-container') : null;
-                if (container) container.focus();
+            // Return focus to the marker that opened it
+            if (prevActive && markers[prevActive]) {
+                const el = markers[prevActive].getElement();
+                const wrapper = el ? el.querySelector('.marker-wrapper') : null;
+                if (wrapper) wrapper.focus();
             }
         }
 
-        // Event Listeners
-        panelCloseBtn.addEventListener('click', hidePanel);
+        // --- EVENTS ---
+        closeBtn.addEventListener('click', hidePanel);
+
+        // Clicking map background closes panel
         map.on('click', hidePanel);
 
-        // Map Click Accessibility (ESC to clear selection)
+        // Escape key closes panel
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') hidePanel();
         });
