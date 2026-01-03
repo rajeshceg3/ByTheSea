@@ -532,7 +532,7 @@
                 iconAnchor: [20, 20]
             });
 
-            const marker = L.marker(loc.coords, { icon: icon });
+            const marker = L.marker(loc.coords, { icon: icon, keyboard: false });
             markers[loc.name] = marker;
 
             // Interaction Handler
@@ -541,9 +541,11 @@
 
                 // Visual update
                 Object.values(markers).forEach(m => {
-                    m.getElement().classList.remove('active-state');
+                    const el = m.getElement();
+                    if (el) el.classList.remove('active-state');
                 });
-                marker.getElement().classList.add('active-state');
+                const currentEl = marker.getElement();
+                if (currentEl) currentEl.classList.add('active-state');
 
                 // Map Fly
                 const isMobile = window.innerWidth < 768;
@@ -562,7 +564,9 @@
                 });
 
                 showPanel(loc, isKeyboard);
-                L.DomEvent.stopPropagation(e);
+                // Standardize event propagation (fixes fragile usage of Leaflet events)
+                const event = e.originalEvent || e;
+                L.DomEvent.stopPropagation(event);
             };
 
             marker.on('click', activate);
@@ -570,7 +574,11 @@
             // Accessibility: Keyboard support attached to DOM element once added
             marker.on('add', () => {
                 const el = marker.getElement();
-                const container = el.querySelector('.marker-container');
+                // Restore state if marker was re-rendered
+                if (activeMarkerName === loc.name && el) {
+                    el.classList.add('active-state');
+                }
+                const container = el ? el.querySelector('.marker-container') : null;
                 if (container) {
                     container.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
