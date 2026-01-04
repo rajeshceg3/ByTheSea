@@ -210,6 +210,7 @@
             transform: translateY(20px) scale(0.98);
             visibility: hidden;
             transition: all 0.5s var(--ease-smooth);
+            will-change: transform, opacity;
         }
 
         .info-card.active {
@@ -279,6 +280,12 @@
             justify-content: center;
             cursor: pointer;
             transition: transform 0.4s var(--ease-elastic);
+            border-radius: 50%;
+        }
+
+        .marker-wrapper:focus-visible {
+            outline: 2px solid var(--c-accent-cool);
+            outline-offset: 4px;
         }
 
         .marker-wrapper:hover {
@@ -577,13 +584,14 @@
                 }
 
                 const wrapper = el ? el.querySelector('.marker-wrapper') : null;
-                if(wrapper) {
+                if(wrapper && !wrapper.dataset.hasListener) {
                     wrapper.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
                             activate(e);
                         }
                     });
+                    wrapper.dataset.hasListener = 'true';
                 }
             });
 
@@ -600,8 +608,8 @@
             activeMarkerName = data.name;
 
             if (shouldFocus) {
-                // Wait for transition
-                setTimeout(() => closeBtn.focus(), 150);
+                // Wait for transition to complete to ensure visibility
+                setTimeout(() => closeBtn.focus(), 550);
             }
         }
 
