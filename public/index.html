@@ -65,6 +65,7 @@
             margin: 0;
             padding: 0;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         body, html {
@@ -451,7 +452,7 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
                 <h2 class="info-title" id="info-title">Title Here</h2>
-                <div class="info-body" id="info-body">
+                <div class="info-body" id="info-body" aria-live="polite">
                     Description goes here.
                 </div>
             </aside>
@@ -516,14 +517,21 @@
         const closeBtn = document.getElementById('close-panel');
 
         let activeMarkerName = null;
+        let focusTimeout = null;
         const markers = {};
 
         // --- MARKER LOGIC ---
+        const escapeHtml = (text) => {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        };
+
         locations.forEach(loc => {
             const icon = L.divIcon({
                 className: 'custom-marker',
                 html: `
-                    <div class="marker-wrapper" role="button" tabindex="0" aria-label="Explore ${loc.name}">
+                    <div class="marker-wrapper" role="button" tabindex="0" aria-label="Explore ${escapeHtml(loc.name)}">
                         <div class="marker-ripple"></div>
                         <div class="marker-ripple"></div>
                         <div class="marker-dot"></div>
@@ -607,14 +615,27 @@
             panel.setAttribute('aria-hidden', 'false');
             activeMarkerName = data.name;
 
+            // Clear any pending focus timeout to prevent race conditions
+            if (focusTimeout) clearTimeout(focusTimeout);
+
             if (shouldFocus) {
                 // Wait for transition to complete to ensure visibility
-                setTimeout(() => closeBtn.focus(), 550);
+                focusTimeout = setTimeout(() => {
+                    if (panel.classList.contains('active')) {
+                        closeBtn.focus();
+                    }
+                }, 550);
             }
         }
 
         function hidePanel() {
             if (!panel.classList.contains('active')) return;
+
+            // Cancel any pending focus attempts
+            if (focusTimeout) {
+                clearTimeout(focusTimeout);
+                focusTimeout = null;
+            }
 
             const prevActive = activeMarkerName;
             panel.classList.remove('active');
@@ -627,11 +648,16 @@
                 if(el) el.classList.remove('active-marker');
             });
 
-            // Return focus to the marker that opened it
+            // Return focus to the marker that opened it, ONLY if it's currently visible in the map view
+            // This prevents disorienting jumps if the user has panned away.
             if (prevActive && markers[prevActive]) {
-                const el = markers[prevActive].getElement();
-                const wrapper = el ? el.querySelector('.marker-wrapper') : null;
-                if (wrapper) wrapper.focus();
+                const marker = markers[prevActive];
+                const bounds = map.getBounds();
+                if (bounds.contains(marker.getLatLng())) {
+                    const el = marker.getElement();
+                    const wrapper = el ? el.querySelector('.marker-wrapper') : null;
+                    if (wrapper) wrapper.focus();
+                }
             }
         }
 
