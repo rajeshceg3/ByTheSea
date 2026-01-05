@@ -9,8 +9,8 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -49,7 +49,7 @@
 
             /* Typography */
             --f-display: 'Playfair Display', serif;
-            --f-body: 'Lato', sans-serif;
+            --f-body: 'Inter', sans-serif;
 
             /* Transitions */
             --ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
@@ -604,7 +604,8 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
                 <h2 class="info-title" id="info-title">Title Here</h2>
-                <div class="info-body" id="info-body">
+                <!-- Added aria-live="polite" from HEAD -->
+                <div class="info-body" id="info-body" aria-live="polite">
                     Description goes here.
                 </div>
             </aside>
@@ -670,6 +671,7 @@
         const curtain = document.getElementById('curtain');
 
         let activeMarkerName = null;
+        let focusTimeout = null; // Added from HEAD
         const markers = {};
 
         // --- ENTRANCE ANIMATION ---
@@ -680,12 +682,19 @@
         });
 
         // --- MARKER LOGIC ---
+        // Added escapeHtml from HEAD
+        const escapeHtml = (text) => {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        };
+
         locations.forEach((loc, index) => {
             const icon = L.divIcon({
                 className: 'custom-marker',
                 html: `
-                    <div class="marker-wrapper" role="button" tabindex="0" aria-label="Explore ${loc.name}" style="animation-delay: ${1.5 + (index * 0.1)}s">
-                        <div class="marker-tooltip">${loc.name}</div>
+                    <div class="marker-wrapper" role="button" tabindex="0" aria-label="Explore ${escapeHtml(loc.name)}" style="animation-delay: ${1.5 + (index * 0.1)}s">
+                        <div class="marker-tooltip">${escapeHtml(loc.name)}</div>
                         <div class="marker-ripple"></div>
                         <div class="marker-ripple"></div>
                         <div class="marker-dot"></div>
@@ -737,7 +746,7 @@
 
             marker.on('click', activate);
 
-            // Add listener for Keyboard Enter/Space
+            // Add listener for Keyboard Enter/Space (Adapted from HEAD to work with origin/main structure)
             marker.on('add', () => {
                 const el = marker.getElement();
                 if (activeMarkerName === loc.name && el) {
@@ -745,6 +754,7 @@
                 }
 
                 const wrapper = el ? el.querySelector('.marker-wrapper') : null;
+                // Using dataset to prevent duplicate listeners (from HEAD)
                 if(wrapper && !wrapper.dataset.hasListener) {
                     wrapper.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
@@ -768,14 +778,28 @@
             panel.setAttribute('aria-hidden', 'false');
             activeMarkerName = data.name;
 
+            // Clear any pending focus timeout to prevent race conditions (from HEAD)
+            if (focusTimeout) clearTimeout(focusTimeout);
+
             if (shouldFocus) {
                 // Wait for transition to complete to ensure visibility
-                setTimeout(() => closeBtn.focus(), 600);
+                // HEAD uses 550ms. origin/main used 600ms. I'll use 600ms to be safe with origin/main's 0.6s transition.
+                focusTimeout = setTimeout(() => {
+                    if (panel.classList.contains('active')) {
+                        closeBtn.focus();
+                    }
+                }, 600);
             }
         }
 
         function hidePanel() {
             if (!panel.classList.contains('active')) return;
+
+            // Cancel any pending focus attempts (from HEAD)
+            if (focusTimeout) {
+                clearTimeout(focusTimeout);
+                focusTimeout = null;
+            }
 
             const prevActive = activeMarkerName;
             panel.classList.remove('active');
@@ -788,11 +812,16 @@
                 if(el) el.classList.remove('active-marker');
             });
 
-            // Return focus to the marker that opened it
+            // Return focus to the marker that opened it, ONLY if it's currently visible in the map view
+            // This prevents disorienting jumps if the user has panned away. (from HEAD)
             if (prevActive && markers[prevActive]) {
-                const el = markers[prevActive].getElement();
-                const wrapper = el ? el.querySelector('.marker-wrapper') : null;
-                if (wrapper) wrapper.focus();
+                const marker = markers[prevActive];
+                const bounds = map.getBounds();
+                if (bounds.contains(marker.getLatLng())) {
+                    const el = marker.getElement();
+                    const wrapper = el ? el.querySelector('.marker-wrapper') : null;
+                    if (wrapper) wrapper.focus();
+                }
             }
         }
 
