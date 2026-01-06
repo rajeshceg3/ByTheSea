@@ -96,13 +96,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 1.2s var(--ease-smooth), opacity 0.8s ease;
+            transition: transform 1.2s var(--ease-smooth), opacity 0.8s ease, visibility 0s 1.2s;
             transform-origin: top;
         }
 
         .loading-curtain.hidden {
             transform: translateY(-100%);
             pointer-events: none;
+            visibility: hidden;
         }
 
         .loading-title {
@@ -732,46 +733,62 @@
         });
 
         // --- 3D TILT EFFECT (Desktop) ---
-        if (window.matchMedia("(min-width: 768px)").matches) {
-            document.addEventListener('mousemove', (e) => {
-                const { clientX, clientY } = e;
+        const mediaQuery = window.matchMedia("(min-width: 768px)");
 
-                // Function to apply tilt to an element
-                const applyTilt = (el, strength) => {
-                    if (!el) return;
-                    const rect = el.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
+        const handleMouseMove = (e) => {
+            const { clientX, clientY } = e;
 
-                    // Calculate distance from center (clamped)
-                    const x = (clientX - centerX) / (window.innerWidth / 2) * strength;
-                    const y = (clientY - centerY) / (window.innerHeight / 2) * strength;
+            // Function to apply tilt to an element
+            const applyTilt = (el, strength) => {
+                if (!el) return;
+                const rect = el.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
 
-                    // Rotate opposite to movement
-                    el.style.transform = `perspective(1000px) rotateX(${-y}deg) rotateY(${x}deg)`;
-                };
+                // Calculate distance from center (clamped)
+                const x = (clientX - centerX) / (window.innerWidth / 2) * strength;
+                const y = (clientY - centerY) / (window.innerHeight / 2) * strength;
 
-                // Apply to Brand Card
-                applyTilt(brandCard, 8);
+                // Disable transition for instant follow
+                el.style.transition = 'none';
+                // Rotate opposite to movement
+                el.style.transform = `perspective(1000px) rotateX(${-y}deg) rotateY(${x}deg)`;
+            };
 
-                // Apply to Info Panel (only if active)
-                if (panel.classList.contains('active')) {
-                   applyTilt(panel, 5);
-                }
-            });
+            // Apply to Brand Card
+            applyTilt(brandCard, 8);
 
-            // Reset transform on mouse leave for smoother feel
-            document.addEventListener('mouseleave', () => {
-                if(brandCard) brandCard.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
-                if(panel) panel.style.transform = 'translateY(0) scale(1) perspective(1000px) rotateX(0) rotateY(0)';
-                // Note: panel reset needs to respect its active state transform.
-                // Actually, CSS handles the active state transform (translateY/scale).
-                // The mousemove overrides style.transform inline.
-                // So resetting it to empty string falls back to CSS.
-                brandCard.style.transform = '';
+            // Apply to Info Panel (only if active)
+            if (panel.classList.contains('active')) {
+                applyTilt(panel, 5);
+            }
+        };
+
+        const resetTilt = () => {
+            if (brandCard) {
+                brandCard.style.transition = ''; // Revert to CSS transition
+                brandCard.style.transform = '';  // Revert to CSS transform
+            }
+            if (panel) {
+                panel.style.transition = '';
                 panel.style.transform = '';
-            });
-        }
+            }
+        };
+
+        const initTiltInteractions = (matches) => {
+            if (matches) {
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseleave', resetTilt);
+            } else {
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseleave', resetTilt);
+                resetTilt(); // Ensure clean state when switching to mobile
+            }
+        };
+
+        // Initialize and listen for changes
+        initTiltInteractions(mediaQuery.matches);
+        mediaQuery.addEventListener('change', (e) => initTiltInteractions(e.matches));
 
         // --- MARKER LOGIC ---
         const escapeHtml = (text) => {
@@ -875,10 +892,12 @@
             });
 
             requestAnimationFrame(() => {
-                const spans = panelBody.querySelectorAll('span');
-                spans.forEach(s => {
-                    s.style.opacity = '1';
-                    s.style.transform = 'translateY(0)';
+                requestAnimationFrame(() => {
+                    const spans = panelBody.querySelectorAll('span');
+                    spans.forEach(s => {
+                        s.style.opacity = '1';
+                        s.style.transform = 'translateY(0)';
+                    });
                 });
             });
 
@@ -900,7 +919,7 @@
                     if (panel.classList.contains('active')) {
                         closeBtn.focus();
                     }
-                }, 600);
+                }, 650);
             }
         }
 
