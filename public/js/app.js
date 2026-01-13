@@ -62,6 +62,29 @@ window.addEventListener('load', () => {
 // --- 3D TILT EFFECT (Desktop) ---
 if (window.matchMedia("(min-width: 768px)").matches) {
     let lastCall = 0;
+    let cachedRects = { brandCard: null, panel: null };
+
+    const updateRects = () => {
+        if (brandCard) cachedRects.brandCard = brandCard.getBoundingClientRect();
+        if (panel) cachedRects.panel = panel.getBoundingClientRect();
+    };
+
+    // Update rects on load, resize, and panel activation
+    window.addEventListener('resize', updateRects);
+    window.addEventListener('load', updateRects);
+
+    // Observer for panel class changes to update rect when it becomes active
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'class' && panel.classList.contains('active')) {
+                // Wait for transition to likely finish or just update now and hope for best
+                // Ideally we update after transition, but for now update immediately + delay
+                setTimeout(updateRects, 650);
+            }
+        });
+    });
+    observer.observe(panel, { attributes: true });
+
     document.addEventListener('mousemove', (e) => {
         const now = Date.now();
         if (now - lastCall < 16) return; // ~60fps throttle
@@ -70,9 +93,9 @@ if (window.matchMedia("(min-width: 768px)").matches) {
         const { clientX, clientY } = e;
 
         // Function to apply tilt to an element
-        const applyTilt = (el, strength) => {
-            if (!el) return;
-            const rect = el.getBoundingClientRect();
+        const applyTilt = (el, rect, strength) => {
+            if (!el || !rect) return;
+
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
 
@@ -85,24 +108,20 @@ if (window.matchMedia("(min-width: 768px)").matches) {
         };
 
         // Apply to Brand Card
-        applyTilt(brandCard, 8);
+        if (!cachedRects.brandCard) updateRects();
+        applyTilt(brandCard, cachedRects.brandCard, 8);
 
         // Apply to Info Panel (only if active)
         if (panel.classList.contains('active')) {
-           applyTilt(panel, 5);
+           if (!cachedRects.panel) updateRects();
+           applyTilt(panel, cachedRects.panel, 5);
         }
     });
 
     // Reset transform on mouse leave for smoother feel
     document.addEventListener('mouseleave', () => {
-        if(brandCard) brandCard.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
-        if(panel) panel.style.transform = 'translateY(0) scale(1) perspective(1000px) rotateX(0) rotateY(0)';
-        // Note: panel reset needs to respect its active state transform.
-        // Actually, CSS handles the active state transform (translateY/scale).
-        // The mousemove overrides style.transform inline.
-        // So resetting it to empty string falls back to CSS.
-        brandCard.style.transform = '';
-        panel.style.transform = '';
+        if(brandCard) brandCard.style.transform = '';
+        if(panel) panel.style.transform = '';
     });
 }
 
@@ -208,10 +227,12 @@ function showPanel(data, shouldFocus) {
     });
 
     requestAnimationFrame(() => {
-        const spans = panelBody.querySelectorAll('span');
-        spans.forEach(s => {
-            s.style.opacity = '1';
-            s.style.transform = 'translateY(0)';
+        requestAnimationFrame(() => {
+            const spans = panelBody.querySelectorAll('span');
+            spans.forEach(s => {
+                s.style.opacity = '1';
+                s.style.transform = 'translateY(0)';
+            });
         });
     });
 
@@ -233,7 +254,7 @@ function showPanel(data, shouldFocus) {
             if (panel.classList.contains('active')) {
                 closeBtn.focus();
             }
-        }, 600);
+        }, 650);
     }
 }
 
