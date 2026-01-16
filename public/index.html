@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Mamallapuram | Coastal Serenity</title>
     <meta name="description" content="An immersive journey through the stone and silence of Mamallapuram.">
+    <meta name="theme-color" content="#F5F7FA">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/leaflet@1.9.4/dist/leaflet.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com/leaflet@1.9.4/dist/leaflet.css; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*.basemaps.cartocdn.com; connect-src 'self';">
 
     <!-- Fonts -->
@@ -25,6 +26,7 @@
     <!-- Loading Curtain -->
     <div class="loading-curtain" id="curtain">
         <div class="loading-title">Coastal Serenity</div>
+        <div class="loading-subtitle">MAMALLAPURAM GUIDE</div>
     </div>
 
     <!-- Texture Overlay for Grain Effect -->
@@ -37,6 +39,7 @@
 
     <div class="ui-layer">
         <a href="#map" class="skip-link">Skip to map</a>
+
         <header class="header-container stagger-enter">
             <div class="brand-card glass-panel" id="brand-card">
                 <h1 id="main-title">Mamallapuram</h1>
@@ -47,10 +50,12 @@
         <div class="panel-container">
             <aside id="info-panel" class="info-card glass-panel" aria-hidden="true">
                 <button class="close-btn" id="close-panel" aria-label="Close details" aria-controls="info-panel">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
                 </button>
                 <h2 class="info-title" id="info-title">Title Here</h2>
-                <!-- Added aria-live="polite" from HEAD -->
                 <div class="info-body" id="info-body" aria-live="polite">
                     Description goes here.
                 </div>

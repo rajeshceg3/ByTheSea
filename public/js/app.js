@@ -43,85 +43,92 @@ window.addEventListener('load', () => {
         const span = document.createElement('span');
         span.textContent = char;
         span.className = 'letter-span';
-        span.style.transitionDelay = `${1.2 + (index * 0.05)}s`; // Start after header enter
+        span.style.transitionDelay = `${1.0 + (index * 0.03)}s`; // Tighter stagger
         mainTitle.appendChild(span);
     });
 
     // Trigger animations
     setTimeout(() => {
         curtain.classList.add('hidden');
+
         // Reveal title letters
-        const letters = document.querySelectorAll('.letter-span');
-        letters.forEach(l => {
-            l.style.opacity = '1';
-            l.style.transform = 'translateY(0) rotate(0deg)';
+        requestAnimationFrame(() => {
+            const letters = document.querySelectorAll('.letter-span');
+            letters.forEach(l => {
+                l.style.opacity = '1';
+                l.style.transform = 'translateY(0) rotate(0deg)';
+            });
         });
-    }, 1000);
+    }, 800);
 });
 
-// --- 3D TILT EFFECT (Desktop) ---
+// --- SMOOTH 3D TILT EFFECT (Desktop) ---
 if (window.matchMedia("(min-width: 768px)").matches) {
-    let lastCall = 0;
-    let cachedRects = { brandCard: null, panel: null };
 
-    const updateRects = () => {
-        if (brandCard) cachedRects.brandCard = brandCard.getBoundingClientRect();
-        if (panel) cachedRects.panel = panel.getBoundingClientRect();
-    };
+    // Lerp function for smooth interpolation
+    const lerp = (start, end, factor) => start + (end - start) * factor;
 
-    // Update rects on load, resize, and panel activation
-    window.addEventListener('resize', updateRects);
-    window.addEventListener('load', updateRects);
+    let targetX = 0, targetY = 0;
+    let currentX = 0, currentY = 0;
+    let rafId = null;
 
-    // Observer for panel class changes to update rect when it becomes active
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.attributeName === 'class' && panel.classList.contains('active')) {
-                // Wait for transition to likely finish or just update now and hope for best
-                // Ideally we update after transition, but for now update immediately + delay
-                setTimeout(updateRects, 650);
-            }
-        });
-    });
-    observer.observe(panel, { attributes: true });
-
-    document.addEventListener('mousemove', (e) => {
-        const now = Date.now();
-        if (now - lastCall < 16) return; // ~60fps throttle
-        lastCall = now;
-
-        const { clientX, clientY } = e;
-
-        // Function to apply tilt to an element
-        const applyTilt = (el, rect, strength) => {
-            if (!el || !rect) return;
-
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-
-            // Calculate distance from center (clamped)
-            const x = (clientX - centerX) / (window.innerWidth / 2) * strength;
-            const y = (clientY - centerY) / (window.innerHeight / 2) * strength;
-
-            // Rotate opposite to movement
-            el.style.transform = `perspective(1000px) rotateX(${-y}deg) rotateY(${x}deg)`;
-        };
+    const updateTilt = () => {
+        // Interpolate current values towards target
+        currentX = lerp(currentX, targetX, 0.1); // 0.1 factor for "heavy" smooth feel
+        currentY = lerp(currentY, targetY, 0.1);
 
         // Apply to Brand Card
-        if (!cachedRects.brandCard) updateRects();
-        applyTilt(brandCard, cachedRects.brandCard, 8);
+        if (brandCard) {
+            brandCard.style.transform = `perspective(1000px) rotateX(${-currentY * 8}deg) rotateY(${currentX * 8}deg)`;
+        }
 
-        // Apply to Info Panel (only if active)
-        if (panel.classList.contains('active')) {
-           if (!cachedRects.panel) updateRects();
-           applyTilt(panel, cachedRects.panel, 5);
+        // Apply to Info Panel (if active)
+        if (panel && panel.classList.contains('active')) {
+             panel.style.transform = `perspective(1000px) rotateX(${-currentY * 5}deg) rotateY(${currentX * 5}deg)`;
+        }
+
+        // Continue loop if there's significant movement remaining
+        if (Math.abs(targetX - currentX) > 0.001 || Math.abs(targetY - currentY) > 0.001) {
+            rafId = requestAnimationFrame(updateTilt);
+        } else {
+            rafId = null;
+        }
+    };
+
+    document.addEventListener('mousemove', (e) => {
+        const { clientX, clientY, innerWidth, innerHeight } = e;
+
+        // Normalize mouse position (-1 to 1)
+        targetX = (clientX / innerWidth) * 2 - 1;
+        targetY = (clientY / innerHeight) * 2 - 1;
+
+        if (!rafId) {
+            rafId = requestAnimationFrame(updateTilt);
         }
     });
 
-    // Reset transform on mouse leave for smoother feel
+    // Reset on mouse leave
     document.addEventListener('mouseleave', () => {
-        if(brandCard) brandCard.style.transform = '';
-        if(panel) panel.style.transform = '';
+        targetX = 0;
+        targetY = 0;
+        if (!rafId) rafId = requestAnimationFrame(updateTilt);
+    });
+
+    // --- MAGNETIC BUTTONS ---
+    const magneticBtns = document.querySelectorAll('.close-btn');
+    magneticBtns.forEach(btn => {
+        btn.addEventListener('mousemove', (e) => {
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+
+            // Magnetic pull strength
+            btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+        });
+
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = 'translate(0, 0)';
+        });
     });
 }
 
@@ -136,7 +143,7 @@ locations.forEach((loc, index) => {
     const icon = L.divIcon({
         className: 'custom-marker',
         html: `
-            <div class="marker-wrapper" role="button" tabindex="0" aria-label="Explore ${escapeHtml(loc.name)}" aria-haspopup="dialog" aria-expanded="false" aria-controls="info-panel" style="animation-delay: ${1.5 + (index * 0.1)}s">
+            <div class="marker-wrapper" role="button" tabindex="0" aria-label="Explore ${escapeHtml(loc.name)}" aria-haspopup="dialog" aria-expanded="false" aria-controls="info-panel" style="animation-delay: ${1.8 + (index * 0.1)}s">
                 <div class="marker-tooltip">${escapeHtml(loc.name)}</div>
                 <div class="marker-ripple"></div>
                 <div class="marker-ripple"></div>
@@ -166,15 +173,17 @@ locations.forEach((loc, index) => {
         if(currentEl) currentEl.classList.add('active-marker');
 
         const isMobile = window.innerWidth < 768;
-        const targetZoom = 16;
+        const targetZoom = 17; // Closer zoom
         const targetPoint = map.project(loc.coords, targetZoom);
-        const offset = isMobile ? L.point(0, 200) : L.point(0, 0);
+
+        // Mobile offset: shift map center down so marker is visible above panel
+        const offset = isMobile ? L.point(0, 250) : L.point(0, 0);
         const targetCenter = map.unproject(targetPoint.add(offset), targetZoom);
 
         map.flyTo(targetCenter, targetZoom, {
             animate: true,
             duration: 1.5,
-            easeLinearity: 0.25
+            easeLinearity: 0.1 // Softer flight
         });
 
         showPanel(loc, isKeyboard);
@@ -214,18 +223,24 @@ function showPanel(data, shouldFocus) {
 
     panelBody.innerHTML = '';
     const words = data.text.split(' ');
+
+    // Create a fragment for better performance
+    const fragment = document.createDocumentFragment();
+
     words.forEach((word, i) => {
         const span = document.createElement('span');
         span.textContent = word;
         span.style.marginRight = '0.25em';
         span.style.opacity = '0';
         span.style.display = 'inline-block';
-        span.style.transform = 'translateY(5px)';
-        span.style.transition = 'all 0.4s ease';
-        span.style.transitionDelay = `${i * 0.02}s`;
-        panelBody.appendChild(span);
+        span.style.transform = 'translateY(8px)';
+        span.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        span.style.transitionDelay = `${i * 0.015}s`; // Faster staggered read
+        fragment.appendChild(span);
     });
+    panelBody.appendChild(fragment);
 
+    // Double RAF to ensure transition triggers
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             const spans = panelBody.querySelectorAll('span');
@@ -258,6 +273,42 @@ function showPanel(data, shouldFocus) {
     }
 }
 
+// --- MOBILE SWIPE TO CLOSE ---
+let touchStartY = 0;
+let touchCurrentY = 0;
+
+panel.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+    // Only allow swipe if we are at the top of the scroll or it's the handle area
+    if (panel.scrollTop > 0) return;
+}, { passive: true });
+
+panel.addEventListener('touchmove', (e) => {
+    if (touchStartY === 0) return; // Not a valid start
+    touchCurrentY = e.touches[0].clientY;
+    const diff = touchCurrentY - touchStartY;
+
+    // If pulling down
+    if (diff > 0 && panel.scrollTop <= 0) {
+         // Visual feedback: drag the panel down slightly
+         // Use transform but respect the existing transition/transform
+         // simpler: just close if threshold met, avoiding complex physics for now to keep it bug-free
+    }
+}, { passive: true });
+
+panel.addEventListener('touchend', (e) => {
+    if (touchStartY === 0) return;
+    const diff = touchCurrentY - touchStartY;
+
+    // Threshold to close: 100px
+    if (diff > 100 && panel.scrollTop <= 0) {
+        hidePanel();
+    }
+
+    touchStartY = 0;
+    touchCurrentY = 0;
+});
+
 function hidePanel() {
     if (!panel.classList.contains('active')) return;
 
@@ -271,7 +322,7 @@ function hidePanel() {
     panel.setAttribute('aria-hidden', 'true');
     activeMarkerName = null;
 
-    // Remove tilt manually if it was applied via JS
+    // Reset tilt via style if needed, though loop handles it
     panel.style.transform = '';
 
     Object.values(markers).forEach(m => {
@@ -316,7 +367,7 @@ map.on('click', (e) => {
     // Cleanup
     setTimeout(() => {
         ripple.remove();
-    }, 800);
+    }, 1000);
 });
 
 document.addEventListener('keydown', (e) => {
