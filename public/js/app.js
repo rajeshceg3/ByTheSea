@@ -218,14 +218,9 @@ locations.forEach((loc, index) => {
 });
 
 // --- PANEL FUNCTIONS ---
-function showPanel(data, shouldFocus) {
-    panelTitle.innerText = data.name;
-
-    panelBody.innerHTML = '';
-    const words = data.text.split(' ');
-
-    // Create a fragment for better performance
+function createStaggeredText(text, baseDelay = 0) {
     const fragment = document.createDocumentFragment();
+    const words = text.split(' ');
 
     words.forEach((word, i) => {
         const span = document.createElement('span');
@@ -235,15 +230,88 @@ function showPanel(data, shouldFocus) {
         span.style.display = 'inline-block';
         span.style.transform = 'translateY(8px)';
         span.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        span.style.transitionDelay = `${i * 0.015}s`; // Faster staggered read
+        span.style.transitionDelay = `${baseDelay + (i * 0.01)}s`;
         fragment.appendChild(span);
     });
-    panelBody.appendChild(fragment);
+
+    return fragment;
+}
+
+function showPanel(data, shouldFocus) {
+    panelTitle.innerText = data.name;
+    panelBody.innerHTML = '';
+
+    // Helper to add sections
+    const addSection = (title, content, delayIndex) => {
+        if (!content) return delayIndex;
+
+        const sectionTitle = document.createElement('h3');
+        sectionTitle.className = 'info-subtitle';
+        sectionTitle.textContent = title;
+        sectionTitle.style.opacity = '0';
+        sectionTitle.style.transform = 'translateY(8px)';
+        sectionTitle.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        sectionTitle.style.transitionDelay = `${delayIndex * 0.1}s`;
+        panelBody.appendChild(sectionTitle);
+
+        const p = document.createElement('div');
+        p.className = 'info-text';
+        p.appendChild(createStaggeredText(content, delayIndex * 0.1));
+        panelBody.appendChild(p);
+
+        return delayIndex + 2; // Increment delay for next section
+    };
+
+    let delayCounter = 0;
+
+    // Summary
+    const summaryP = document.createElement('div');
+    summaryP.className = 'info-summary';
+    summaryP.appendChild(createStaggeredText(data.summary || data.text, 0));
+    panelBody.appendChild(summaryP);
+    delayCounter += 3;
+
+    // History
+    delayCounter = addSection('History', data.history, delayCounter);
+
+    // Details
+    delayCounter = addSection('Architecture & Details', data.details, delayCounter);
+
+    // Tips
+    if (data.tips) {
+        delayCounter = addSection('Visitor Tips', data.tips, delayCounter);
+    }
+
+    // Facts
+    if (data.facts && data.facts.length > 0) {
+        const factTitle = document.createElement('h3');
+        factTitle.className = 'info-subtitle';
+        factTitle.textContent = 'Did You Know?';
+        factTitle.style.opacity = '0';
+        factTitle.style.transform = 'translateY(8px)';
+        factTitle.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        factTitle.style.transitionDelay = `${delayCounter * 0.1}s`;
+        panelBody.appendChild(factTitle);
+
+        const ul = document.createElement('ul');
+        ul.className = 'info-list';
+        data.facts.forEach((fact, i) => {
+            const li = document.createElement('li');
+            li.textContent = fact;
+            li.style.opacity = '0';
+            li.style.transform = 'translateY(8px)';
+            li.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            li.style.transitionDelay = `${(delayCounter * 0.1) + (i * 0.1)}s`;
+            ul.appendChild(li);
+        });
+        panelBody.appendChild(ul);
+    }
 
     // Double RAF to ensure transition triggers
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-            const spans = panelBody.querySelectorAll('span');
+            // Trigger spans in text
+            const spans = panelBody.querySelectorAll('span, .info-subtitle, li');
             spans.forEach(s => {
                 s.style.opacity = '1';
                 s.style.transform = 'translateY(0)';

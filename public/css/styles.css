@@ -319,6 +319,22 @@ h1 {
         transform 0.5s var(--ease-soft),
         visibility 0.5s;
     will-change: transform, opacity;
+    max-height: 80vh; /* Ensure it fits on desktop */
+    overflow-y: auto; /* Enable scrolling */
+    scrollbar-width: thin;
+    scrollbar-color: var(--c-text-tertiary) transparent;
+}
+
+/* Custom Scrollbar for Info Panel */
+.info-card::-webkit-scrollbar {
+    width: 6px;
+}
+.info-card::-webkit-scrollbar-track {
+    background: transparent;
+}
+.info-card::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.1);
+    border-radius: 20px;
 }
 
 .info-card.active {
@@ -342,12 +358,58 @@ h1 {
     letter-spacing: -0.02em;
 }
 
+/* ENRICHED CONTENT STYLES */
+.info-subtitle {
+    font-family: var(--f-display);
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--c-accent-cool-dark);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
 .info-body {
     font-size: 1.05rem;
     line-height: 1.6;
     color: var(--c-text-secondary);
     font-weight: 400;
 }
+
+.info-summary {
+    font-size: 1.1rem;
+    color: var(--c-text-primary);
+    margin-bottom: 1.5rem;
+    border-left: 2px solid var(--c-accent-warm);
+    padding-left: 1rem;
+}
+
+.info-text {
+    margin-bottom: 1rem;
+}
+
+.info-list {
+    list-style: none;
+    margin-top: 0.5rem;
+    padding-left: 0;
+}
+
+.info-list li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.info-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--c-accent-warm);
+    font-weight: bold;
+}
+
+/* --- */
 
 .close-btn {
     position: absolute;
@@ -364,6 +426,7 @@ h1 {
     justify-content: center;
     transition: all 0.3s var(--ease-out-expo);
     color: var(--c-text-primary);
+    z-index: 10;
 }
 
 .close-btn:hover {
