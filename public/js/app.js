@@ -241,6 +241,23 @@ function showPanel(data, shouldFocus) {
     panelTitle.innerText = data.name;
     panelBody.innerHTML = '';
 
+    // Image
+    if (data.image) {
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'info-image-container';
+        imgContainer.style.opacity = '0';
+        imgContainer.style.transform = 'translateY(10px) scale(0.95)';
+        imgContainer.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+
+        const img = document.createElement('img');
+        img.src = data.image;
+        img.alt = data.name;
+        img.className = 'info-image';
+
+        imgContainer.appendChild(img);
+        panelBody.appendChild(imgContainer);
+    }
+
     // Helper to add sections
     const addSection = (title, content, delayIndex) => {
         if (!content) return delayIndex;
@@ -316,6 +333,13 @@ function showPanel(data, shouldFocus) {
                 s.style.opacity = '1';
                 s.style.transform = 'translateY(0)';
             });
+
+            // Trigger Image
+            const imgContainer = panelBody.querySelector('.info-image-container');
+            if (imgContainer) {
+                imgContainer.style.opacity = '1';
+                imgContainer.style.transform = 'translateY(0) scale(1)';
+            }
         });
     });
 
