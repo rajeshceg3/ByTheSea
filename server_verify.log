@@ -1,0 +1,6 @@
+127.0.0.1 - - [20/Jan/2026 14:40:21] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Jan/2026 14:40:21] "GET /css/styles.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Jan/2026 14:40:21] "GET /js/failsafe.js HTTP/1.1" 200 -
+127.0.0.1 - - [20/Jan/2026 14:40:21] "GET /js/app.js HTTP/1.1" 200 -
+127.0.0.1 - - [20/Jan/2026 14:40:22] "GET /js/data.js HTTP/1.1" 200 -
+127.0.0.1 - - [20/Jan/2026 14:40:22] "GET /images/shore-temple.jpg HTTP/1.1" 200 -

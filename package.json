@@ -1,0 +1,32 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "A visually immersive, story-driven digital map experience capturing the essence of Mamallapuram. This project demonstrates a \"World Class\" approach to UI/UX design, transforming a functional map into an emotional journey through stone, salt, and silence.",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx serve public",
+    "lint": "eslint public/js/*.js",
+    "lint:fix": "eslint public/js/*.js --fix",
+    "test": "npx playwright test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rajeshceg3/ByTheSea.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/rajeshceg3/ByTheSea/issues"
+  },
+  "homepage": "https://github.com/rajeshceg3/ByTheSea#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.0"
+  },
+  "dependencies": {
+    "playwright": "^1.57.0"
+  }
+}
