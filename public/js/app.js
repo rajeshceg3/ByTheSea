@@ -281,6 +281,55 @@ function showPanel(data, shouldFocus) {
 
     let delayCounter = 0;
 
+    // Visit Info (New)
+    if (data.visitInfo) {
+        const visitContainer = document.createElement('div');
+        visitContainer.className = 'visit-info-container';
+        visitContainer.style.opacity = '0';
+        visitContainer.style.transform = 'translateY(10px)';
+        visitContainer.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        visitContainer.style.transitionDelay = `${delayCounter * 0.1}s`;
+
+        // Hours
+        if (data.visitInfo.hours) {
+            const row = document.createElement('div');
+            row.className = 'visit-info-item';
+            row.innerHTML = `<span class="visit-info-label">Open:</span> <span>${escapeHtml(data.visitInfo.hours)}</span>`;
+            visitContainer.appendChild(row);
+        }
+        // Fee
+        if (data.visitInfo.fee) {
+            const row = document.createElement('div');
+            row.className = 'visit-info-item';
+            row.innerHTML = `<span class="visit-info-label">Entry:</span> <span>${escapeHtml(data.visitInfo.fee)}</span>`;
+            visitContainer.appendChild(row);
+        }
+
+        panelBody.appendChild(visitContainer);
+        delayCounter += 2;
+    }
+
+    // Google Maps Button (New)
+    if (data.googleMapsUrl) {
+        const btnContainer = document.createElement('div');
+        btnContainer.className = 'action-btn-container';
+        btnContainer.style.opacity = '0';
+        btnContainer.style.transform = 'translateY(10px)';
+        btnContainer.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        btnContainer.style.transitionDelay = `${delayCounter * 0.1}s`;
+
+        const btn = document.createElement('a');
+        btn.href = data.googleMapsUrl;
+        btn.target = '_blank';
+        btn.rel = 'noopener noreferrer';
+        btn.className = 'action-btn';
+        btn.textContent = 'Get Directions';
+
+        btnContainer.appendChild(btn);
+        panelBody.appendChild(btnContainer);
+        delayCounter += 1;
+    }
+
     // Summary
     const summaryP = document.createElement('div');
     summaryP.className = 'info-summary';
@@ -322,6 +371,7 @@ function showPanel(data, shouldFocus) {
             ul.appendChild(li);
         });
         panelBody.appendChild(ul);
+        delayCounter += 2;
     }
 
     // Double RAF to ensure transition triggers
@@ -332,6 +382,13 @@ function showPanel(data, shouldFocus) {
             spans.forEach(s => {
                 s.style.opacity = '1';
                 s.style.transform = 'translateY(0)';
+            });
+
+            // Trigger Visit Info & Action Btn
+            const extras = panelBody.querySelectorAll('.visit-info-container, .action-btn-container');
+            extras.forEach(el => {
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
             });
 
             // Trigger Image

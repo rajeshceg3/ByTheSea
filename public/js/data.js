@@ -3,100 +3,200 @@ export const locations = [
         name: "Shore Temple",
         coords: [12.6111, 80.1973],
         image: "images/shore-temple.jpg",
-        summary: "A UNESCO World Heritage site standing defiant against the Bay of Bengal since the 8th century. The last survivor of the legendary Seven Pagodas, it glows with a golden hue at sunrise.",
-        history: "Built by Narasimhavarman II (Rajasimha) between 700-728 AD, this is one of South India's oldest structural stone temples. Unlike earlier rock-cut shrines, it was constructed from granite blocks. Legend holds it was part of a seven-temple complex, a myth partially substantiated by underwater discoveries after the 2004 tsunami.",
-        details: "The complex houses three shrines: the main east-facing Shiva shrine (Kshatriyasimhesvara), a smaller west-facing Shiva shrine (Rajasimhesvara), and a central shrine for reclining Vishnu (Anantashayi). The pyramidal towers (vimanas) are topped with octagonal domes and stupis. The outer walls are lined with weathered Nandi bulls.",
-        tips: "Visit at 6:00 AM to witness the first rays of sun illuminating the deity. The site ticket covers the Five Rathas as well.",
-        facts: ["Served as a navigational landmark for ancient mariners.", "Constructed from granite blocks brought from nearby quarries.", "Features a rare reclining Vishnu shrine in a Shiva temple complex."]
+        visitInfo: {
+            hours: "6:00 AM - 6:00 PM",
+            fee: "₹40 (Indian), ₹600 (Foreigner)"
+        },
+        googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=12.6111,80.1973",
+        summary: "A timeless sentinel overlooking the Bay of Bengal, the Shore Temple is the crown jewel of Pallava architecture. Built in the 8th century, it was the first structural temple in the region, marking a transition from rock-cut architecture to free-standing stone edifices.",
+        history: "Commissioned by Narasimhavarman II (Rajasimha) in the early 8th century, this temple served as a beacon for mariners. It is the sole survivor of the legendary 'Seven Pagodas' described by Marco Polo. The 2004 tsunami briefly exposed the submerged remains of its sister temples, validating ancient myths.",
+        details: "The complex features three shrines: the main east-facing Shiva shrine (Kshatriyasimhesvara), capturing the first rays of sunrise; a smaller west-facing Shiva shrine; and a unique middle shrine dedicated to a reclining Vishnu (Anantashayi). The vimanas (towers) are pyramidal and stepped, distinct from later Dravidian curves. Rows of weathered Nandi bulls guard the perimeter walls.",
+        tips: "The best time to visit is at sunrise for a golden glow on the granite, or late afternoon for cooler breezes. The entry ticket purchased here is valid for the Five Rathas and Arjuna's Penance on the same day.",
+        facts: [
+            "It is one of the oldest structural stone temples in South India.",
+            "Designed to catch the first rays of the rising sun to illuminate the deity.",
+            "Constructed with granite blocks hauled from quarries 50km away.",
+            "Briefly submerged structures were revealed during the 2004 tsunami withdrawal."
+        ]
     },
     {
         name: "Descent of the Ganges",
         coords: [12.6163, 80.1918],
         image: "images/descent-ganges.jpg",
-        summary: "One of the world's largest open-air rock reliefs, this 7th-century masterpiece is a canvas of stone teeming with life. It captures the celestial event of the Ganges descending to earth.",
-        history: "Carved during the reign of Mahendravarman I and Narasimhavarman I, this 96x43 feet monolith celebrates the Pallava dynasty's artistic zenith. The cleft between the two boulders was ingeniously used to channel rainwater, simulating the river's flow during monsoons.",
-        details: "The relief depicts the penance of the sage Bhagiratha (or Arjuna) to bring the sacred river to earth. It features over 100 figures including gods, semi-divine beings, humans, and animals. Highlights include the 'Cat Ascetic' (a humorous parody), a life-sized elephant family, and the emaciated sage standing on one leg.",
-        tips: "Best viewed in the late afternoon when the sun casts deep shadows, enhancing the 3D effect of the carvings. Look for the monkey grooming another monkey's head.",
-        facts: ["Often called 'Arjuna's Penance', leading to dual interpretations.", "The natural cleft was once fitted with a cistern to create a waterfall.", "Showcases the seamless blend of spiritual narrative and natural humor."]
+        visitInfo: {
+            hours: "6:00 AM - 6:00 PM",
+            fee: "Included with Shore Temple ticket"
+        },
+        googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=12.6163,80.1918",
+        summary: "A colossal open-air bas-relief that turns a massive rock face into a canvas of divine narrative. Also known as Arjuna's Penance, this 7th-century masterpiece is one of the largest rock reliefs in the world.",
+        history: "Carved under the patronage of Narasimhavarman I (Mamalla) to celebrate his victory over the Chalukyas. The ambiguity of the central figure—whether it is Arjuna seeking the Pasupata weapon or Bhagiratha bringing the Ganges to earth—suggests a deliberate dual narrative intended to spark intellectual debate among the courtly elite.",
+        details: "The relief measures 96 by 43 feet. A natural cleft in the rock represents the River Ganges, once fitted with a cistern to release water during festivals. The carving teems with over 100 figures: gods, nagas, hunters, and animals, all rushing towards the sacred river. Note the 'Cat Ascetic' near the elephant's feet, a humorous fable of a cat feigning piety to catch mice.",
+        tips: "Binoculars help in appreciating the upper details. Visit in the late afternoon when the sun hits the relief directly, creating deep shadows that enhance the three-dimensional effect.",
+        facts: [
+            "Features a life-sized elephant family carved with incredible naturalism.",
+            "The 'Cat Ascetic' is a visual pun referencing the Panchatantra tales.",
+            "The natural cleft was ingeniously used to simulate a flowing river during rains.",
+            "Contains scenes from both the Mahabharata and local folklore."
+        ]
     },
     {
         name: "Krishna’s Butter Ball",
         coords: [12.6175, 80.1923],
         image: "images/butter-ball.jpg",
-        summary: "A geological marvel, this 250-ton granite boulder rests precariously on a 45-degree slope. Known as 'Vaanirai Kal' (Stone of Sky God), it defies gravity and centuries of erosion.",
-        history: "This glacial boulder has remained in place for over 1,200 years. Pallava kings reportedly tried to move it with seven elephants but failed. In 1908, the Governor of Madras attempted to remove it for safety, but it wouldn't budge.",
-        details: "The rock is about 6 meters high and 5 meters wide, yet its contact point with the hill is less than 4 square feet. The contrasting weathering on its surface tells a story of millennia of exposure.",
-        tips: "A favorite spot for trick photography (pretending to push or hold it). The shadow of the rock provides a cool respite during hot afternoons. Be careful on the slippery slope.",
-        facts: ["Inspired the design of the 'Tanjavur Doll' which never falls.", "Weighs approximately 250,000 kilograms.", "The name 'Butter Ball' is a colonial invention; locals call it 'Vaanirai Kal'."]
+        visitInfo: {
+            hours: "6:00 AM - 6:00 PM",
+            fee: "Free (Part of the open park)"
+        },
+        googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=12.6175,80.1923",
+        summary: "A gravity-defying geological marvel, this 250-ton granite boulder balances precariously on a slippery 45-degree slope. Known locally as 'Vaanirai Kal' (Stone of the Sky God), it is a favorite spot for curious travelers and physics enthusiasts.",
+        history: "This glacial erratic has sat immovable for over 1,200 years. King Narasimhavarman I reportedly failed to move it with seven elephants. In 1908, British Governor Arthur Lawley attempted to remove it fearing it would roll onto the town, but seven elephants again failed to budge it.",
+        details: "The rock is approximately 6 meters high and 5 meters wide. Despite its rounded appearance, the back is sheared off flat. The contact point with the hill is shockingly small (less than 4 square feet), creating an illusion of imminent collapse. The varying coloration on the rock face tells the story of centuries of sun and rain.",
+        tips: "It’s a perfect spot for fun perspective photography—pretend to hold it up or push it. The shadow of the boulder offers a cool resting spot. Be careful on the slope as the rock surface can be slippery.",
+        facts: [
+            "Weighs approximately 250,000 kilograms.",
+            "Inspired the creation of the 'Tanjavur Doll' which always returns to an upright position.",
+            "The name 'Krishna's Butter Ball' is a colonial-era invention; locals call it Vaanirai Kal.",
+            "It has survived earthquakes and cyclones without moving an inch."
+        ]
     },
     {
         name: "Pancha Rathas",
         coords: [12.6083, 80.1894],
         image: "images/pancha-rathas.jpg",
-        summary: "Five monolithic pyramidal structures resembling processional chariots (Rathas). Carved from a single large rock, this complex serves as a textbook of South Indian temple architecture.",
-        history: "Excavated during the reign of Narasimhavarman I (Mamalla) in the 7th century, these structures were never consecrated as temples due to a flaw in the rock. They were named after the Pandava brothers of the Mahabharata, though there is no historical connection.",
-        details: "Each Ratha represents a different architectural style (Draupadi, Arjuna, Bhima, Dharmaraja, Nakula-Sahadeva). The site also features three monolithic animal sculptures: an elephant, a lion, and a bull, each carved with incredible naturalism.",
-        tips: "Walk around the back to see the unfinished sections, offering a glimpse into the top-to-bottom carving technique.",
-        facts: ["Carved from a single outcrop of pink granite.", "Hidden under sand until excavation by the British 200 years ago.", "The Dharmaraja Ratha is the tallest and most ornate."]
+        visitInfo: {
+            hours: "6:00 AM - 6:00 PM",
+            fee: "Included with Shore Temple ticket"
+        },
+        googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=12.6083,80.1894",
+        summary: "An architectural laboratory of the Pallavas. These five monolithic structures, carved from a single ridge of pink granite, resemble wooden chariots (Rathas). They serve as a textbook of South Indian temple styles.",
+        history: "Excavated during the reign of Narasimhavarman I (Mamalla) in the 7th century. They were never consecrated because the stupis (finials) were never installed, likely due to the king's death. Named after the Pandava brothers, this association is purely legendary with no historical basis.",
+        details: "Each Ratha showcases a different roof style: Draupadi (thatched hut), Arjuna (stepped pyramid), Bhima (barrel vault), Dharmaraja (tallest pyramid), and Nakula-Sahadeva (apsidal back). The complex also features three monolithic animals—an elephant, a lion, and a bull—each carved with breathtaking realism.",
+        tips: "Walk behind the Rathas to see the unfinished base, which reveals how the carvers worked from top to bottom. This technique ensured that they didn't need scaffolding.",
+        facts: [
+            "Carved from a single continuous outcrop of granite.",
+            "Remained hidden under sand dunes until British excavations 200 years ago.",
+            "The Dharmaraja Ratha features the earliest known portrait sculptures of Pallava kings.",
+            "Serves as a template for the later structural temples of Tamil Nadu."
+        ]
     },
     {
         name: "Mahabalipuram Lighthouse",
         coords: [12.6144, 80.1947],
         image: "images/lighthouse.jpg",
-        summary: "A modern beacon standing beside an ancient one. The 1904 circular tower offers panoramic views, while the adjacent 7th-century Olakkannesvara Temple served as India's oldest lighthouse.",
-        history: "The Olakkannesvara Temple (atop the Mahishasuramardini Cave) functioned as a lighthouse in the Pallava era, where bonfires on the roof guided ships. The modern granite tower was built by the British to continue this maritime legacy.",
-        details: "The modern tower stands 26 meters tall with a range of 24 nautical miles. The ancient Olakkannesvara Temple is a structural temple dedicated to Shiva, now bereft of its superstructure but rich in history.",
-        tips: "The climb involves steep spiral stairs. From the top, you can see the nuclear power plant in Kalpakkam to the south and Chennai's skyline to the north on clear days.",
-        facts: ["One of the few lighthouses in India with an elevator (often restricted).", "The site marks a continuity of navigational aid spanning 1300 years.", "Open to tourists from 10 AM to 5 PM."]
+        visitInfo: {
+            hours: "10:00 AM - 5:00 PM",
+            fee: "₹10 (Entry), ₹20 (Camera)"
+        },
+        googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=12.6144,80.1947",
+        summary: "A tale of two beacons: a modern granite tower standing beside the ancient Olakkannesvara Temple, which served as a lighthouse 1,300 years ago. The climb offers the best panoramic views of the town and coastline.",
+        history: "The adjacent Olakkannesvara Temple (atop the Mahishasuramardini Cave) was the original lighthouse; Pallava kings lit bonfires on its roof to guide ships. The modern circular masonry tower was constructed by the British in 1904 to continue this maritime legacy.",
+        details: "The modern lighthouse stands 26 meters tall with a range of 24 nautical miles. The ancient Olakkannesvara Temple is a structural temple dedicated to Shiva (specifically the form 'Flame Eye'). Though its superstructure is lost, the base remains a testament to early structural engineering.",
+        tips: "The spiral staircase is steep and narrow; take your time. The view from the top is spectacular—look for the nuclear power plant domes of Kalpakkam to the south and the distant Chennai skyline to the north.",
+        facts: [
+            "India's oldest lighthouse functioned from the roof of the 7th-century temple next door.",
+            "One of the few lighthouses in India with an elevator (though often reserved for staff).",
+            "The site marks over a millennium of continuous navigational history.",
+            "Offers a bird's-eye view of the entire Pallava monument complex."
+        ]
     },
     {
         name: "Varaha Cave Temple",
         coords: [12.6186, 80.1928],
         image: "images/varaha-cave.jpg",
-        summary: "An exquisite rock-cut cave temple dedicated to Vishnu. It houses some of the most perfectly preserved and artistically superior bas-reliefs in Mahabalipuram.",
-        history: "Excavated in the 7th century under Narasimhavarman I, this mandapa (hall) exemplifies the early Pallava rock-cut style. It served as a place of worship and a gallery of divine narratives.",
-        details: "The cave features four major panels: the Boar Avatar (Varaha) rescuing the Earth Goddess (Bhumi), the Dwarf Avatar (Vamana) taking three strides (Trivikrama), the Goddess Gajalakshmi bathed by elephants, and Durga. The pillars have lion-bases typical of the Mamalla style.",
-        tips: "Pay attention to the intricate details of the jewelry and drapery on the figures. The Gajalakshmi panel is considered a masterpiece of Indian art.",
-        facts: ["The Varaha panel is unique for the tender expression between the Boar and Earth Goddess.", "One of the most complete cave temples in the region.", "The architectural elements imitate wooden structures of the time."]
+        visitInfo: {
+            hours: "6:00 AM - 6:00 PM",
+            fee: "Free"
+        },
+        googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=12.6186,80.1928",
+        summary: "Hidden behind the Arjuna's Penance, this rock-cut cave temple contains some of the most exquisite and well-preserved bas-reliefs in Indian art. It is a quiet sanctuary dedicated to Vishnu.",
+        history: "Excavated in the 7th century under Narasimhavarman I. It follows the mandapa style, mimicking the wooden architecture of the era in stone. The cave served as a royal chapel and a canvas for political and religious allegories.",
+        details: "Four major panels adorn the walls: the Boar Avatar (Varaha) lifting the Earth Goddess; the Dwarf Avatar (Vamana) transforming into Trivikrama; Goddess Gajalakshmi bathed by elephants; and Durga. The Varaha panel is celebrated for the tender intimacy between the boar-faced god and the rescued Bhumi (Earth).",
+        tips: "Observe the Gajalakshmi panel carefully; it is considered a masterpiece for the intricate detailing of the water being poured by the elephants and the serene expression of the Goddess.",
+        facts: [
+            "The pillars feature lion-bases, a signature of the Mamalla architectural style.",
+            "The Varaha panel is an allegory for the King rescuing his kingdom from enemies.",
+            "Architectural elements like 'kudus' (arches) imitate wooden prototypes.",
+            "Remains remarkably well-preserved due to its sheltered location."
+        ]
     },
     {
         name: "Tiger Cave",
         coords: [12.6500, 80.2000],
         image: "images/tiger-cave.jpg",
-        summary: "Located 5km north of the main complex, this rock-cut shrine is framed by a dramatic arch of eleven tiger heads. A serene spot surrounded by casuarina trees.",
-        history: "Dating to the 8th century (Rajasimha period), this was likely a mandapa used for festivals or public addresses rather than a pure temple. It is associated with the cult of Durga.",
-        details: "The 'cave' is a shallow shrine. The defining feature is the 'Yali' (mythical lion/tiger) pilasters and the ferocious tiger heads surrounding the entrance. To the side, there are reliefs of elephants supporting the structure.",
-        tips: "A great picnic spot away from the crowds. The acoustics of the semi-circular 'stage' are remarkable.",
-        facts: ["The 'tigers' are actually Yalis, mythical leogryphs.", "Nearby excavations revealed a brick temple from the Sangam period.", "Often skipped by tourists, making it a peaceful retreat."]
+        visitInfo: {
+            hours: "6:00 AM - 6:00 PM",
+            fee: "Free"
+        },
+        googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=12.6500,80.2000",
+        summary: "Located 5km north of the main town, this is not a cave but a shallow rock-cut shrine framed by a dramatic arch of eleven ferocious tiger heads. A serene, park-like setting makes it a peaceful retreat.",
+        history: "Dated to the 8th century (Rajasimha period), this structure was likely a 'festival mandapa' or an open-air theater for royal audiences rather than a temple. It is associated with the cult of Durga, the warrior goddess.",
+        details: "The defining feature is the arch of 'Yalis'—mythical leogryphs that look like tigers. To the left are reliefs of an elephant and a horse with riders, possibly depicting a royal procession. The acoustics of the semi-circular cavity are excellent, supporting the theory of it being a performance stage.",
+        tips: "This is a great picnic spot away from the crowds. Clap your hands or speak in the center of the shrine to test the acoustics. The nearby beach is quiet and pristine.",
+        facts: [
+            "The 'tigers' are actually Yalis, mythical protectors in Hindu iconography.",
+            "Excavations nearby revealed a brick temple from the even older Sangam period.",
+            "Often missed by day-trippers, offering a solitary experience.",
+            "The two large rock boulders in front may have been intended for further carvings."
+        ]
     },
     {
         name: "Krishna Mandapam",
         coords: [12.6165, 80.1920],
         image: "images/krishna-mandapam.jpg",
-        summary: "The largest cave temple in Mahabalipuram, celebrating the pastoral life of Lord Krishna. A pillared hall was added later to protect the magnificent relief carving.",
-        history: "Originally an open-air relief like Arjuna's Penance, the Vijayanagara rulers (16th century) likely added the pillared mandapa to protect it. It depicts the scene of Krishna lifting Govardhana Hill.",
-        details: "The carving is a slice of village life: a woodcutter with his axe, a milkmaid with pots, a cow licking its calf, and a shepherd playing the flute. Krishna stands centrally, effortlessly lifting the mountain to shelter his people from Indra's storm.",
-        tips: "Look for the realistic depiction of the cow licking its calf—a testament to the artist's observation of nature.",
-        facts: ["Contains one of the most realistic portrayals of animals in Indian art.", "The architecture shows a blend of Pallava and later Vijayanagara styles.", "Located right next to Arjuna's Penance."]
+        visitInfo: {
+            hours: "6:00 AM - 6:00 PM",
+            fee: "Free"
+        },
+        googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=12.6165,80.1920",
+        summary: "The largest cave temple in Mahabalipuram, this site celebrates the pastoral life of Lord Krishna. Unlike other caves, it features a built-up pillared hall added later to protect the open-air relief.",
+        history: "The relief was carved in the mid-7th century. The Vijayanagara rulers (16th century) recognized its value and added the granite mandapa (hall) to shield it from the elements. It depicts the Govardhandhari story—Krishna lifting the mountain.",
+        details: "The carving is a slice of ancient village life: a woodcutter with his axe, a milkmaid balancing pots, a cow tenderly licking its calf, and a shepherd playing the flute. Krishna stands centrally, holding up Govardhana Hill with his left hand to shelter the villagers from Indra's storm.",
+        tips: "Look for the realistic depiction of the cow licking its calf—it is cited by art historians as one of the most naturalistic animal portrayals in Indian art.",
+        facts: [
+            "Blends 7th-century Pallava sculpture with 16th-century Vijayanagara architecture.",
+            "One of the few representations of Krishna without his flute in the main act.",
+            "Located immediately next to Arjuna's Penance.",
+            "Captures the concept of 'protection' which was central to royal ideology."
+        ]
     },
     {
         name: "Mahishasuramardini Cave",
         coords: [12.6142, 80.1945],
         image: "images/mahishasuramardini-cave.jpg",
-        summary: "A cave temple renowned for two large, dynamic panels representing the battle between Goddess Durga and the Buffalo Demon, and Vishnu in cosmic sleep.",
-        history: "Created in the mid-7th century, this cave sits beneath the Olakkanesvara Temple. It represents a high point in the narrative energy of Pallava sculpture.",
-        details: "The north wall depicts the vigorous battle scene: the eight-armed Durga riding a lion, aiming her bow at the retreating Buffalo Demon (Mahishasura). The south wall contrasts this with the serene Anantasayana Vishnu sleeping on the serpent Adisesha.",
-        tips: "Compare the energy of the two opposing panels—the dynamic fury of the battle versus the hypnotic calm of Vishnu's slumber.",
-        facts: ["The battle scene is considered one of the finest energetic reliefs in India.", "Unfinished details on the pillars show the carving process.", "The central shrine features a Somaskanda panel (Shiva, Parvati, and Skanda)."]
+        visitInfo: {
+            hours: "6:00 AM - 6:00 PM",
+            fee: "Free"
+        },
+        googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=12.6142,80.1945",
+        summary: "A cave temple defined by contrast: the kinetic fury of battle on one wall and the cosmic serenity of sleep on the other. It is considered the high point of Pallava narrative art.",
+        history: "Created in the mid-7th century, this cave sits beneath the Olakkannesvara Temple (old lighthouse). It remained unfinished, as evidenced by the rough floor and uncarved pillar bases, yet the main panels are complete masterpieces.",
+        details: "The north wall depicts the eight-armed Durga riding a lion, drawing her bow against the Buffalo Demon (Mahishasura), who retreats in defeat. The south wall shows Vishnu in Anantasayana (cosmic sleep) on the serpent Adisesha, a picture of absolute calm. The central shrine features a Somaskanda panel.",
+        tips: "Stand in the center and turn your head left and right to experience the 'rasas' (emotions) of Fury (Raudra) and Peace (Shanti). The lighting is best in the morning.",
+        facts: [
+            "The battle scene is widely regarded as one of India's finest dynamic sculptures.",
+            "Unfinished details on the pillars provide clues to the rock-cutting techniques used.",
+            "The central shrine porch has two lion pillars, protecting the deity.",
+            "It sits directly under the ancient lighthouse temple."
+        ]
     },
     {
         name: "Ganesha Ratha",
         coords: [12.6172, 80.1920],
         image: "images/ganesha-ratha.jpg",
-        summary: "A complete and elegant monolithic temple carved from a single pink granite boulder. Originally dedicated to Shiva, it now houses a deity of Ganesha.",
-        history: "Completed in the late 7th century by Paramesvaravarman I. It is one of the few Rathas that is fully finished. The Ganesha idol was installed later by villagers, replacing the original Shiva lingam.",
-        details: "It features a wagon-roof (shala) structure, resembling the Bhima Ratha but smaller and more refined. The finials (stupis) are fully formed. The inscription on the wall preserves a Sanskrit verse praising the king.",
-        tips: "Notice the trident (trishul) markings on the corners, indicating its original dedication to Shiva.",
-        facts: ["The only Ratha that is currently an active place of worship.", "Carved from a rock that was once part of the Arjuna's Penance ridge.", "The text 'Atyantakama' (One of endless desires) is inscribed here."]
+        visitInfo: {
+            hours: "6:00 AM - 6:00 PM",
+            fee: "Free"
+        },
+        googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=12.6172,80.1920",
+        summary: "A sleek, complete monolithic temple carved from a single pink granite boulder. Originally dedicated to Shiva, it has been an active shrine for Ganesha for centuries.",
+        history: "Completed in the late 7th century by Paramesvaravarman I. It is one of the few Rathas that is fully finished with its finials (stupis). Villagers later installed a Ganesha idol, replacing the original Shiva lingam, and it remains a site of living worship.",
+        details: "The structure features a wagon-vaulted roof (shala), similar to the Bhima Ratha but more refined. The inscription 'Atyantakama' (He of endless desires) is found on the wall. The trident (trishul) markings on the corners betray its original Shaivite dedication.",
+        tips: "This is the only monument where you might see daily rituals being performed. Please be respectful of the worshippers. It is located just north of the Krishna Butter Ball.",
+        facts: [
+            "The only Ratha in the complex that is currently an active temple.",
+            "Carved from a rock that was part of the same ridge as Arjuna's Penance.",
+            "The 'wagon roof' style was a precursor to the gopurams (gateway towers) of later temples.",
+            "The name changed from a Shiva temple to Ganesha Ratha over time."
+        ]
     }
 ];
