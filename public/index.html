@@ -44,8 +44,22 @@
             <div class="brand-card glass-panel" id="brand-card">
                 <h1 id="main-title">Mamallapuram</h1>
                 <div class="subtitle">Stone &bull; Salt &bull; Silence</div>
+                <button id="start-tour-btn" class="start-tour-btn">Start Guided Tour</button>
             </div>
         </header>
+
+        <div id="tour-controls" class="tour-controls hidden" aria-hidden="true">
+            <button id="prev-tour-btn" class="tour-btn" aria-label="Previous Stop">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <span id="tour-progress" class="tour-progress">1 / 10</span>
+            <button id="next-tour-btn" class="tour-btn" aria-label="Next Stop">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+            <button id="end-tour-btn" class="tour-close-btn" aria-label="End Tour">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
 
         <div class="panel-container">
             <aside id="info-panel" class="info-card glass-panel" aria-hidden="true">

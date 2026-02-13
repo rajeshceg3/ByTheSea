@@ -242,7 +242,13 @@ body, html {
     padding: 2rem 3rem;
     position: relative;
     overflow: hidden;
-    transition: transform 0.4s var(--ease-out-expo);
+    transition: transform 0.4s var(--ease-out-expo), opacity 0.4s var(--ease-out-expo);
+}
+
+.brand-card.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-20px);
 }
 
 /* Premium Sheen */
@@ -830,4 +836,148 @@ h1 {
 
 .action-btn:active {
     transform: translateY(0);
+}
+
+/*
+ * TOUR MODE
+ */
+.start-tour-btn {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--c-accent-cool-dark);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--f-body);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s var(--ease-out-expo);
+    box-shadow: 0 4px 12px rgba(44, 122, 123, 0.2);
+    pointer-events: auto;
+}
+
+.start-tour-btn:hover {
+    background: var(--c-accent-cool);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(44, 122, 123, 0.3);
+}
+
+.tour-controls {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--glass-shadow);
+    z-index: 2000;
+    transition: opacity 0.5s var(--ease-soft), transform 0.5s var(--ease-soft), visibility 0.5s;
+    pointer-events: auto;
+}
+
+.tour-controls.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(20px);
+}
+
+.tour-btn {
+    background: transparent;
+    border: none;
+    color: var(--c-text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.2s var(--ease-out-expo);
+}
+
+.tour-btn:hover {
+    background: rgba(0,0,0,0.05);
+    color: var(--c-accent-cool-dark);
+    transform: scale(1.1);
+}
+
+.tour-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.tour-close-btn {
+    background: rgba(0,0,0,0.05);
+    border: none;
+    color: var(--c-text-secondary);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.5rem;
+    transition: all 0.2s;
+}
+
+.tour-close-btn:hover {
+    background: rgba(200, 50, 50, 0.1);
+    color: #e53e3e;
+}
+
+.tour-progress {
+    font-family: var(--f-display);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--c-text-primary);
+    min-width: 60px;
+    text-align: center;
+    letter-spacing: 0.05em;
+}
+
+/* Progressive Disclosure */
+.tour-hidden {
+    display: none;
+}
+
+.read-more-btn {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    margin-top: 1rem;
+    background: rgba(255,255,255,0.5);
+    border: 1px dashed var(--c-accent-cool);
+    color: var(--c-accent-cool-dark);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    transition: all 0.3s;
+}
+
+.read-more-btn:hover {
+    background: rgba(255,255,255,0.8);
+    background-color: var(--c-accent-highlight);
+}
+
+@media (max-width: 768px) {
+    .tour-controls {
+        bottom: 1.5rem;
+        width: 90%;
+        max-width: 350px;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        z-index: 2000;
+    }
 }
