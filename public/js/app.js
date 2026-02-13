@@ -34,7 +34,13 @@ const elements = {
     closeBtn: document.getElementById('close-panel'),
     curtain: document.getElementById('curtain'),
     brandCard: document.getElementById('brand-card'),
-    mainTitle: document.getElementById('main-title')
+    mainTitle: document.getElementById('main-title'),
+    tourControls: document.getElementById('tour-controls'),
+    startTourBtn: document.getElementById('start-tour-btn'),
+    prevTourBtn: document.getElementById('prev-tour-btn'),
+    nextTourBtn: document.getElementById('next-tour-btn'),
+    endTourBtn: document.getElementById('end-tour-btn'),
+    tourProgress: document.getElementById('tour-progress')
 };
 
 // --- STATE ---
@@ -42,6 +48,10 @@ const state = {
     activeMarkerName: null,
     focusTimeout: null,
     markers: {},
+    tour: {
+        active: false,
+        currentStep: 0
+    },
     tilt: {
         targetX: 0,
         targetY: 0,
@@ -258,7 +268,7 @@ function showPanel(data, shouldFocus) {
     let delayCounter = 0;
 
     // Helper to add sections
-    const addSection = (title, content, delayIndex) => {
+    const addSection = (title, content, delayIndex, container = elements.panelBody) => {
         if (!content) return delayIndex;
 
         const sectionTitle = document.createElement('h3');
@@ -268,12 +278,12 @@ function showPanel(data, shouldFocus) {
         sectionTitle.style.transform = 'translateY(8px)';
         sectionTitle.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
         sectionTitle.style.transitionDelay = `${delayIndex * 0.1}s`;
-        elements.panelBody.appendChild(sectionTitle);
+        container.appendChild(sectionTitle);
 
         const p = document.createElement('div');
         p.className = 'info-text';
         p.appendChild(createStaggeredText(content, delayIndex * 0.1));
-        elements.panelBody.appendChild(p);
+        container.appendChild(p);
 
         return delayIndex + 2;
     };
@@ -332,10 +342,19 @@ function showPanel(data, shouldFocus) {
     elements.panelBody.appendChild(summaryP);
     delayCounter += 3;
 
+    // --- PROGRESSIVE DISCLOSURE SETUP ---
+    let detailsContainer = elements.panelBody;
+    if (state.tour.active) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'tour-hidden';
+        elements.panelBody.appendChild(wrapper);
+        detailsContainer = wrapper;
+    }
+
     // Sections
-    delayCounter = addSection('History', data.history, delayCounter);
-    delayCounter = addSection('Architecture & Details', data.details, delayCounter);
-    if (data.tips) delayCounter = addSection('Visitor Tips', data.tips, delayCounter);
+    delayCounter = addSection('History', data.history, delayCounter, detailsContainer);
+    delayCounter = addSection('Architecture & Details', data.details, delayCounter, detailsContainer);
+    if (data.tips) delayCounter = addSection('Visitor Tips', data.tips, delayCounter, detailsContainer);
 
     // Facts
     if (data.facts && data.facts.length > 0) {
@@ -346,7 +365,7 @@ function showPanel(data, shouldFocus) {
         factTitle.style.transform = 'translateY(8px)';
         factTitle.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
         factTitle.style.transitionDelay = `${delayCounter * 0.1}s`;
-        elements.panelBody.appendChild(factTitle);
+        detailsContainer.appendChild(factTitle);
 
         const ul = document.createElement('ul');
         ul.className = 'info-list';
@@ -359,7 +378,43 @@ function showPanel(data, shouldFocus) {
             li.style.transitionDelay = `${(delayCounter * 0.1) + (i * 0.1)}s`;
             ul.appendChild(li);
         });
-        elements.panelBody.appendChild(ul);
+        detailsContainer.appendChild(ul);
+    }
+
+    // Add Read More Button for Tour
+    if (state.tour.active) {
+        const btn = document.createElement('button');
+        btn.className = 'read-more-btn';
+        btn.textContent = 'Dive Deeper';
+        btn.onclick = () => {
+            detailsContainer.classList.remove('tour-hidden');
+            detailsContainer.style.display = 'block';
+
+            // Animate children in
+            Array.from(detailsContainer.children).forEach((child, i) => {
+                child.style.opacity = '0';
+                child.style.transform = 'translateY(10px)';
+                child.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                child.style.transitionDelay = `${i * 0.05}s`;
+            });
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    Array.from(detailsContainer.children).forEach(child => {
+                        child.style.opacity = '1';
+                        child.style.transform = 'translateY(0)';
+                    });
+                });
+            });
+
+            btn.remove();
+
+            // Focus on first header inside for a11y
+            const firstHeader = detailsContainer.querySelector('h3');
+            if(firstHeader) firstHeader.setAttribute('tabindex', '-1');
+            if(firstHeader) firstHeader.focus();
+        };
+        elements.panelBody.appendChild(btn);
     }
 
     // Animate
@@ -547,4 +602,118 @@ map.on('click', (e) => {
 
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') hidePanel();
+});
+
+/**
+ * TOUR MANAGER
+ */
+class TourManager {
+    constructor() {
+        this.updateUI();
+    }
+
+    start() {
+        state.tour.active = true;
+        state.tour.currentStep = 0;
+        this.updateUI();
+        this.goToStep(0);
+    }
+
+    end() {
+        state.tour.active = false;
+        this.updateUI();
+        hidePanel();
+
+        // Reset map view
+        map.flyTo([12.6140, 80.1935], 15, { duration: 1.5 });
+    }
+
+    next() {
+        if (state.tour.currentStep < locations.length - 1) {
+            this.goToStep(state.tour.currentStep + 1);
+        } else {
+            this.end();
+        }
+    }
+
+    prev() {
+        if (state.tour.currentStep > 0) {
+            this.goToStep(state.tour.currentStep - 1);
+        }
+    }
+
+    goToStep(index) {
+        state.tour.currentStep = index;
+        const loc = locations[index];
+
+        // Update Progress
+        if (elements.tourProgress) {
+            elements.tourProgress.textContent = `${index + 1} / ${locations.length}`;
+        }
+
+        // Handle Buttons
+        if (elements.prevTourBtn) {
+            elements.prevTourBtn.disabled = index === 0;
+            elements.prevTourBtn.style.opacity = index === 0 ? '0.3' : '1';
+        }
+
+        if (elements.nextTourBtn) {
+             if (index === locations.length - 1) {
+                elements.nextTourBtn.setAttribute('aria-label', 'Finish Tour');
+            } else {
+                elements.nextTourBtn.setAttribute('aria-label', 'Next Stop');
+            }
+        }
+
+        // Fly and Activate
+        const marker = state.markers[loc.name];
+        if (marker) {
+            marker.fire('click');
+        }
+    }
+
+    updateUI() {
+        if (state.tour.active) {
+            if (elements.brandCard) elements.brandCard.classList.add('hidden');
+            if (elements.tourControls) {
+                elements.tourControls.classList.remove('hidden');
+                elements.tourControls.setAttribute('aria-hidden', 'false');
+            }
+        } else {
+            if (elements.brandCard) elements.brandCard.classList.remove('hidden');
+            if (elements.tourControls) {
+                elements.tourControls.classList.add('hidden');
+                elements.tourControls.setAttribute('aria-hidden', 'true');
+            }
+        }
+    }
+}
+
+const tourManager = new TourManager();
+
+// --- TOUR EVENTS ---
+if (elements.startTourBtn) {
+    elements.startTourBtn.addEventListener('click', () => tourManager.start());
+}
+
+if (elements.prevTourBtn) {
+    elements.prevTourBtn.addEventListener('click', () => tourManager.prev());
+}
+
+if (elements.nextTourBtn) {
+    elements.nextTourBtn.addEventListener('click', () => tourManager.next());
+}
+
+if (elements.endTourBtn) {
+    elements.endTourBtn.addEventListener('click', () => tourManager.end());
+}
+
+document.addEventListener('keydown', (e) => {
+    if (!state.tour.active) return;
+
+    if (e.key === 'ArrowRight') {
+        tourManager.next();
+    } else if (e.key === 'ArrowLeft') {
+        tourManager.prev();
+    }
 });
