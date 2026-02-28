@@ -5,6 +5,16 @@ import { locations } from './data.js';
  */
 
 /**
+ * Triggers haptic feedback on supported devices.
+ * @param {number|number[]} pattern - Vibration pattern (e.g., 50, or [100, 30, 100])
+ */
+const triggerHaptic = (pattern = 50) => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(pattern);
+    }
+};
+
+/**
  * Sanitizes a string for safe HTML insertion.
  * @param {string} text - The text to sanitize.
  * @returns {string} - The sanitized HTML string.
@@ -65,6 +75,77 @@ const state = {
         isDragging: false
     }
 };
+
+// --- AUDIO GUIDE SYSTEM ---
+const audioGuide = {
+    synth: window.speechSynthesis,
+    utterance: null,
+    isPlaying: false,
+
+    play(text) {
+        if (!this.synth) return;
+        this.stop();
+        this.utterance = new SpeechSynthesisUtterance(text);
+
+        // Try to find a good English voice
+        const voices = this.synth.getVoices();
+        const preferredVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google')) || voices.find(v => v.lang.startsWith('en'));
+        if (preferredVoice) this.utterance.voice = preferredVoice;
+
+        this.utterance.onend = () => {
+            this.isPlaying = false;
+            this.updateButtonState();
+        };
+
+        this.synth.play(this.utterance);
+        this.isPlaying = true;
+        this.updateButtonState();
+    },
+
+    stop() {
+        if (!this.synth) return;
+        this.synth.cancel();
+        this.isPlaying = false;
+        this.updateButtonState();
+    },
+
+    toggle(text) {
+        if (this.isPlaying) {
+            this.stop();
+        } else {
+            this.play(text);
+        }
+    },
+
+    updateButtonState() {
+        const btn = document.getElementById('audio-guide-btn');
+        if (!btn) return;
+        if (this.isPlaying) {
+            btn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="6" y="4" width="4" height="16"></rect>
+                    <rect x="14" y="4" width="4" height="16"></rect>
+                </svg>
+                Stop Audio
+            `;
+            btn.classList.add('playing');
+        } else {
+            btn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+                Listen
+            `;
+            btn.classList.remove('playing');
+        }
+    }
+};
+
+// Ensure voices are loaded (Chrome sometimes needs this)
+if (window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = () => audioGuide.synth.getVoices();
+}
 
 // --- MAP INITIALIZATION ---
 const map = L.map('map', {
@@ -216,6 +297,9 @@ function hidePanel() {
         state.focusTimeout = null;
     }
 
+    // Stop audio when panel closes
+    audioGuide.stop();
+
     const prevActive = state.activeMarkerName;
     elements.panel.classList.remove('active');
     elements.panel.setAttribute('aria-hidden', 'true');
@@ -314,24 +398,53 @@ function showPanel(data, shouldFocus) {
         delayCounter += 2;
     }
 
+    // Actions Container (Directions + Audio Guide)
+    const actionContainer = document.createElement('div');
+    actionContainer.className = 'action-btn-container';
+    actionContainer.style.opacity = '0';
+    actionContainer.style.transform = 'translateY(10px)';
+    actionContainer.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    actionContainer.style.transitionDelay = `${delayCounter * 0.1}s`;
+
     // Directions Button
     if (data.googleMapsUrl) {
-        const btnContainer = document.createElement('div');
-        btnContainer.className = 'action-btn-container';
-        btnContainer.style.opacity = '0';
-        btnContainer.style.transform = 'translateY(10px)';
-        btnContainer.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        btnContainer.style.transitionDelay = `${delayCounter * 0.1}s`;
+        const dirBtn = document.createElement('a');
+        dirBtn.href = data.googleMapsUrl;
+        dirBtn.target = '_blank';
+        dirBtn.rel = 'noopener noreferrer';
+        dirBtn.className = 'action-btn';
+        dirBtn.textContent = 'Get Directions';
+        actionContainer.appendChild(dirBtn);
+    }
 
-        const btn = document.createElement('a');
-        btn.href = data.googleMapsUrl;
-        btn.target = '_blank';
-        btn.rel = 'noopener noreferrer';
-        btn.className = 'action-btn';
-        btn.textContent = 'Get Directions';
+    // Audio Guide Button
+    if (window.speechSynthesis) {
+        const audioBtn = document.createElement('button');
+        audioBtn.id = 'audio-guide-btn';
+        audioBtn.className = 'action-btn audio-btn';
+        audioBtn.setAttribute('aria-label', 'Listen to summary');
 
-        btnContainer.appendChild(btn);
-        elements.panelBody.appendChild(btnContainer);
+        // Initial state
+        audioBtn.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+            Listen
+        `;
+
+        const audioText = `${data.name}. ${data.summary} ${state.tour.active ? data.history : ''}`;
+
+        audioBtn.addEventListener('click', () => {
+            triggerHaptic(20);
+            audioGuide.toggle(audioText);
+        });
+
+        actionContainer.appendChild(audioBtn);
+    }
+
+    if (actionContainer.hasChildNodes()) {
+        elements.panelBody.appendChild(actionContainer);
         delayCounter += 1;
     }
 
@@ -482,6 +595,7 @@ locations.forEach((loc, index) => {
     state.markers[loc.name] = marker;
 
     const activate = (e) => {
+        triggerHaptic([30, 50, 30]); // Distinct pattern for marker activation
         const isKeyboard = e.type === 'keydown' || (e.originalEvent && e.originalEvent.type === 'keydown');
 
         Object.values(state.markers).forEach(m => {
@@ -570,6 +684,7 @@ elements.panel.addEventListener('touchend', () => {
 
     // Threshold to close: 80px
     if (diff > 80) {
+        triggerHaptic(50); // Haptic feedback on close
         hidePanel();
     } else {
         // Snap back
@@ -668,7 +783,16 @@ class TourManager {
         // Fly and Activate
         const marker = state.markers[loc.name];
         if (marker) {
+            triggerHaptic(30); // Gentle feedback on tour navigation
             marker.fire('click');
+
+            // Auto-play audio if in tour mode
+            setTimeout(() => {
+                if (state.tour.active && window.speechSynthesis) {
+                    const audioText = `${loc.name}. ${loc.summary} ${loc.history}`;
+                    audioGuide.play(audioText);
+                }
+            }, 1500); // Wait for flyTo and panel open
         }
     }
 
