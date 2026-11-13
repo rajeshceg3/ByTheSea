@@ -160,11 +160,11 @@ const map = L.map('map', {
 
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-    subdomains: 'abcd',
-    maxZoom: 20
-}).addTo(map);
+// Warm paper basemap (worlds shared module): OpenFreeMap vector tiles,
+// custom watercolor-wash style. Free public instance, no API key.
+maplibregl.setWorkerUrl('vendor/maplibre/maplibre-gl-csp-worker.js');
+L.maplibreGL({style: window.WARM_MAP_STYLE}).addTo(map);
+map.attributionControl.addAttribution('<a href="https://openfreemap.org" target="_blank">OpenFreeMap</a> <a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>');
 
 // --- APP LOGIC ---
 
