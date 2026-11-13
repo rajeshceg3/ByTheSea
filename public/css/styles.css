@@ -160,11 +160,8 @@ body, html {
     background: radial-gradient(circle at center, transparent 50%, rgba(245, 247, 250, 0.6) 100%);
 }
 
-/* Map Tiles Custom Filter - "Coastal Dream" */
-.leaflet-tile-pane {
-    filter: grayscale(0.9) contrast(0.95) brightness(1.05) sepia(0.1) hue-rotate(170deg) saturate(0.8);
-    transition: filter 0.8s ease;
-}
+/* The old "Coastal Dream" raster filter was retired with the Carto tiles:
+   the warm-paper vector basemap carries its own palette natively. */
 
 #map {
     height: 100%;
